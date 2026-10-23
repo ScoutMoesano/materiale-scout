@@ -1,0 +1,1401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestione Materiale Scout</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Outfit', sans-serif; }
+    .sig-canvas { 
+      border: 2px dashed #cbd5e1; 
+      border-radius: 0.75rem; 
+      cursor: crosshair; 
+      background: #fafafa;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-stone-100 text-stone-800 min-h-screen flex flex-col">
+
+  <!-- HEADER APPLICAZIONE -->
+  <header class="bg-emerald-900 text-white shadow-md border-b-4 border-amber-600">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3 cursor-pointer" onclick="goHome()">
+        <div class="bg-amber-500 p-2.5 rounded-lg text-emerald-950 font-bold shadow-inner">
+          <i class="fa-solid fa-campground text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-wide">Gestione Materiale Scout</h1>
+          <p class="text-xs text-emerald-200">Portale Magazzino & Comande Famiglie</p>
+        </div>
+      </div>
+
+      <!-- NAVBAR NAVIGAZIONE (Animatori) -->
+      <nav id="adminNav" class="hidden flex flex-wrap gap-2 items-center bg-emerald-950/60 p-1.5 rounded-xl border border-emerald-800/50">
+        <button onclick="showTab('stock')" id="btn-stock" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 bg-emerald-700 text-white">
+          <i class="fa-solid fa-boxes-stacked"></i> Stock
+        </button>
+        <button onclick="showTab('editor')" id="btn-editor" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/50">
+          <i class="fa-solid fa-pen-to-square"></i> Editor Moduli
+        </button>
+        <button onclick="showTab('orders')" id="btn-orders" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/50">
+          <i class="fa-solid fa-clipboard-list"></i> Comande
+        </button>
+        <button onclick="openSettingsModal()" class="px-2.5 py-1.5 rounded-lg text-sm font-medium text-emerald-300 hover:text-white hover:bg-emerald-800/50" title="Impostazioni">
+          <i class="fa-solid fa-gear"></i>
+        </button>
+        <button onclick="logout()" class="px-2.5 py-1.5 rounded-lg text-sm font-medium text-rose-300 hover:text-rose-100 hover:bg-rose-950/50" title="Esci">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </nav>
+
+      <div id="familyBadge" class="hidden flex items-center gap-2 bg-amber-500/20 text-amber-200 px-3 py-1.5 rounded-full text-xs font-semibold border border-amber-500/30">
+        <i class="fa-solid fa-user-shield"></i> <span id="familyBadgeText">Accesso Famiglia</span>
+        <button onclick="logout()" class="ml-2 text-amber-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENITORE PRINCIPALE -->
+  <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
+
+    <!-- 0. SCHERMATA LOGIN INIZIALE -->
+    <section id="sec-login" class="max-w-md mx-auto my-8 bg-white rounded-2xl shadow-xl border border-stone-200 overflow-hidden">
+      <div class="bg-gradient-to-br from-emerald-800 to-emerald-950 p-6 text-white text-center">
+        <div class="inline-flex p-3 bg-white/10 rounded-full mb-3 text-amber-400">
+          <i class="fa-solid fa-key text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold">Accesso al Portale</h2>
+        <p class="text-xs text-emerald-200 mt-1">Inserisci il codice di accesso per continuare</p>
+      </div>
+
+      <div class="p-6 space-y-6">
+        <!-- FORM ACCESSO FAMIGLIE -->
+        <div class="space-y-3 bg-amber-50/60 p-4 rounded-xl border border-amber-200">
+          <label class="block text-sm font-bold text-amber-900 flex items-center gap-2">
+            <i class="fa-solid fa-users text-amber-600"></i> Accesso Famiglie (per Branca)
+          </label>
+          <input type="password" id="inputPasscodeFamiglia" placeholder="Inserisci il codice della branca..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500 outline-none text-stone-800 bg-white">
+          
+          <div class="bg-white/80 p-2.5 rounded-lg border border-amber-200 text-xs text-stone-600 space-y-1">
+            <p class="font-semibold text-amber-800 flex items-center gap-1">
+              <i class="fa-solid fa-lightbulb text-amber-500"></i> Suggerimento codici:
+            </p>
+            <ul class="list-disc list-inside space-y-0.5 pl-1">
+              <li>Lupetti: <span class="font-mono bg-amber-100 px-1 py-0.5 rounded font-bold text-amber-900">Delnostromeglio</span></li>
+              <li>Esploratori: <span class="font-mono bg-amber-100 px-1 py-0.5 rounded font-bold text-amber-900">Semprepronti</span></li>
+            </ul>
+          </div>
+
+          <button onclick="loginFamiglia()" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-semibold py-2 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
+            Entra nel Formulario <i class="fa-solid fa-arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="relative flex py-1 items-center">
+          <div class="flex-grow border-t border-stone-200"></div>
+          <span class="flex-shrink mx-4 text-xs text-stone-400 font-semibold uppercase">oppure</span>
+          <div class="flex-grow border-t border-stone-200"></div>
+        </div>
+
+        <!-- FORM ACCESSO ANIMATORI -->
+        <div class="space-y-3 bg-emerald-50/60 p-4 rounded-xl border border-emerald-200">
+          <label class="block text-sm font-bold text-emerald-900 flex items-center gap-2">
+            <i class="fa-solid fa-user-gear text-emerald-700"></i> Area Animatori
+          </label>
+          <input type="password" id="inputPasscodeMaster" placeholder="Password animatori..." class="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none text-stone-800 bg-white">
+          <button onclick="loginMaster()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-semibold py-2 rounded-lg transition-all shadow-sm flex items-center justify-center gap-2">
+            Accedi al Pannello Animatori <i class="fa-solid fa-lock-open"></i>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. SEZIONE STOCK (ANIMATORI) -->
+    <section id="sec-stock" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+        <div>
+          <h2 class="text-xl font-bold text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-boxes-stacked text-emerald-700"></i> Gestione Magazzino (Stock)
+          </h2>
+          <p class="text-xs text-stone-500">Gestione giacenze con immagini, categorie, branca e link Hajk.ch</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <input type="text" id="stockSearch" oninput="renderStockTables()" placeholder="Cerca articolo o SKU..." class="px-3 py-2 border rounded-lg text-sm w-full md:w-64 outline-none focus:ring-2 focus:ring-emerald-500">
+          <button onclick="openCategoryModal()" class="bg-stone-200 hover:bg-stone-300 text-stone-700 text-sm font-semibold px-3 py-2 rounded-lg transition-all flex items-center gap-2">
+            <i class="fa-solid fa-folder-plus"></i> Nuova Categoria
+          </button>
+          <button onclick="openArticleModal()" class="bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold px-4 py-2 rounded-lg transition-all flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-plus"></i> Nuovo Articolo
+          </button>
+        </div>
+      </div>
+
+      <div id="stockCategoryContainers" class="space-y-8"></div>
+    </section>
+
+    <!-- 2. SEZIONE EDITOR MODULI (ANIMATORI) -->
+    <section id="sec-editor" class="hidden space-y-6">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-stone-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-pen-to-square text-emerald-700"></i> Editor Moduli & Gestione Branche
+          </h2>
+          <p class="text-xs text-stone-500">Personalizza formulari, prezzi, link Hajk.ch e gestisci le varie branche</p>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button onclick="openNewBranchModal()" class="bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold px-3 py-2 rounded-lg shadow">
+            + Aggiungi Nuova Branca
+          </button>
+        </div>
+      </div>
+
+      <!-- BOTTONI SELEZIONE BRANCA DINAMICI -->
+      <div id="editorBranchTabs" class="flex flex-wrap gap-2 bg-white p-3 rounded-xl border border-stone-200 shadow-sm"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-5 rounded-xl shadow-sm border border-stone-200 space-y-4">
+          <h3 class="font-bold text-stone-800 border-b pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-sliders text-amber-600"></i> Impostazioni Branca: <span id="editorBranchTitle" class="text-amber-600">Lupetti</span>
+          </h3>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Messaggio Introduttivo Formulario</label>
+            <textarea id="editorIntroText" rows="3" class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Carica Documenti / PDF Scaricabili</label>
+            <div id="editorDocList" class="space-y-2 mb-2"></div>
+            
+            <div class="p-2 border-2 border-dashed border-stone-300 rounded-lg text-center bg-stone-50">
+              <label class="cursor-pointer text-xs font-semibold text-emerald-700 hover:text-emerald-800 flex items-center justify-center gap-1">
+                <i class="fa-solid fa-file-arrow-up text-base"></i> Carica file PDF dal computer
+                <input type="file" accept="application/pdf,.doc,.docx" onchange="handleFileUpload(event)" class="hidden">
+              </label>
+            </div>
+          </div>
+
+          <button onclick="saveEditorBranchConfig()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold py-2 rounded-lg text-sm shadow transition-all">
+            Salva Impostazioni Branca
+          </button>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-5 rounded-xl shadow-sm border border-stone-200 space-y-4">
+          <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="font-bold text-stone-800 flex items-center gap-2">
+              <i class="fa-solid fa-list-check text-emerald-600"></i> Articoli del Modulo (Prezzi, Nomi, Link Hajk e Immagini)
+            </h3>
+            <button onclick="openArticleModal()" class="text-xs bg-emerald-100 text-emerald-800 font-bold px-2.5 py-1 rounded hover:bg-emerald-200">
+              + Aggiungi Nuovo Elemento
+            </button>
+          </div>
+
+          <div id="editorArticlesContainer" class="space-y-3 max-h-[500px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SEZIONE COMANDE / REGISTRO (ANIMATORI) -->
+    <section id="sec-orders" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-4 rounded-xl shadow-sm border border-stone-200">
+        <div>
+          <h2 class="text-xl font-bold text-stone-800 flex items-center gap-2">
+            <i class="fa-solid fa-clipboard-list text-emerald-700"></i> Registro Comande Ricevute
+          </h2>
+          <p class="text-xs text-stone-500">Riepilogo ordinazioni, dettagli e firme delle famiglie</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <button onclick="syncDataFromCloud()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-sm font-semibold px-3 py-2 rounded-lg transition-all flex items-center gap-2 border">
+            <i class="fa-solid fa-arrows-rotate"></i> Aggiorna Dati
+          </button>
+          <button onclick="exportOrdersCSV()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-sm font-semibold px-3 py-2 rounded-lg transition-all flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-file-csv"></i> Esporta Excel / CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="p-4 border-b bg-stone-50 flex flex-wrap gap-3 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-stone-500 uppercase">Filtra Branca:</span>
+            <select id="filterOrderBranch" onchange="renderOrdersTable()" class="text-xs border rounded-md p-1.5 outline-none">
+              <option value="all">Tutte le Branche</option>
+            </select>
+          </div>
+          <div class="text-xs text-stone-500 font-semibold" id="ordersCounter">Totale: 0 comande</div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr class="bg-stone-100 text-stone-600 font-bold border-b text-xs uppercase">
+                <th class="p-3">ID / Data</th>
+                <th class="p-3">Branca</th>
+                <th class="p-3">Partecipante</th>
+                <th class="p-3">Genitore / Contatto</th>
+                <th class="p-3">Articoli Ordinati</th>
+                <th class="p-3">Totale (CHF)</th>
+                <th class="p-3">Stato</th>
+                <th class="p-3 text-right">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-stone-100"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. SEZIONE FORMULARIO FAMIGLIE -->
+    <section id="sec-family-form" class="hidden max-w-4xl mx-auto space-y-6">
+      
+      <div id="familyBranchHeader" class="bg-gradient-to-r from-amber-500 to-amber-700 text-white p-6 rounded-2xl shadow-md space-y-2"></div>
+
+      <div id="familyDocsContainer" class="hidden bg-white p-4 rounded-xl border border-stone-200 shadow-sm">
+        <h3 class="text-sm font-bold text-stone-800 mb-2 flex items-center gap-2">
+          <i class="fa-solid fa-file-pdf text-rose-600"></i> Documenti Utili da Scaricare
+        </h3>
+        <div id="familyDocsList" class="flex flex-wrap gap-3"></div>
+      </div>
+
+      <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-6">
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 space-y-4">
+          <h3 class="text-base font-bold text-stone-800 border-b pb-2 flex items-center gap-2">
+            <i class="fa-solid fa-id-card text-emerald-700"></i> Dati Anagrafici
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1" id="lblChildName">Nome e Cognome Partecipante *</label>
+              <input type="text" id="inputChildName" required class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome e Cognome Genitore *</label>
+              <input type="text" id="inputParentName" required class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Email Genitore *</label>
+              <input type="email" id="inputParentEmail" required class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Telefono *</label>
+              <input type="tel" id="inputParentPhone" required class="w-full p-2.5 border rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl shadow-sm border border-stone-200 space-y-4">
+          <div class="flex justify-between items-center border-b pb-2">
+            <h3 class="text-base font-bold text-stone-800 flex items-center gap-2">
+              <i class="fa-solid fa-shirt text-amber-600"></i> Articoli Disponibili
+            </h3>
+            <span class="text-xs text-stone-500">Seleziona quantità e misura</span>
+          </div>
+
+          <div id="familyCatalogList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div class="bg-amber-50 p-6 rounded-xl border border-amber-200 space-y-4">
+          <!-- AVVISO ORDINAZIONE VINCOLANTE -->
+          <div class="bg-white/80 p-3 rounded-lg border border-amber-300 text-xs text-amber-900 font-semibold flex items-start gap-2 shadow-sm">
+            <i class="fa-solid fa-circle-exclamation text-amber-600 text-base mt-0.5"></i>
+            <div>
+              Si ricorda che <strong>l'ordinazione è vincolante</strong> e che la fattura sarà consegnata assieme alla merce.
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-amber-200 pb-3 pt-2">
+            <div>
+              <span class="text-xs uppercase font-bold text-amber-800">Totale Indicativo Comanda</span>
+              <div class="text-2xl font-black text-amber-900" id="orderTotalDisplay">CHF 0.00</div>
+            </div>
+            <div class="text-xs text-amber-800 max-w-md bg-white/70 p-3 rounded-lg border border-amber-300/60 leading-relaxed">
+              <i class="fa-solid fa-triangle-exclamation text-amber-600 mr-1"></i>
+              I prezzi indicati sono netti in CHF. Spese di spedizione escluse.
+            </div>
+          </div>
+
+          <!-- FIRMA DIGITALE SENZA TASTO PROVA -->
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="block text-xs font-bold text-amber-900 uppercase">Firma Elettronica del Genitore *</label>
+              <button type="button" onclick="clearSignature()" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-700 px-2.5 py-1 rounded font-semibold"><i class="fa-solid fa-eraser"></i> Pulisci</button>
+            </div>
+            
+            <div class="relative">
+              <canvas id="sigCanvas" class="sig-canvas w-full h-32"></canvas>
+            </div>
+            <p class="text-[11px] text-stone-500">Firma nel riquadro usando il mouse o il dito (su smartphone/tablet)</p>
+          </div>
+
+          <div class="pt-2 border-t border-amber-200/60 space-y-2">
+            <div class="flex items-start gap-2">
+              <input type="checkbox" id="chkPrivacy" required class="mt-0.5 w-4 h-4 accent-amber-600 rounded">
+              <label for="chkPrivacy" class="text-xs text-stone-600 leading-tight">
+                Ho letto e accetto l'<strong>Informativa sulla Privacy</strong>.
+              </label>
+            </div>
+            <p class="text-[10px] text-stone-400 leading-normal pl-6">
+              I dati personali forniti vengono raccolti ed elaborati esclusivamente per la gestione delle ordinazioni del materiale scout interno, in conformità con la Legge federale sulla protezione dei dati (LPD).
+            </p>
+          </div>
+        </div>
+
+        <button type="submit" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-3.5 rounded-xl text-base shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Invia Comanda Ufficiale
+        </button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- MODALE AGGIUNTA CATEGORIA STOCK -->
+  <div id="modalCategory" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-bold text-stone-800">Nuova Categoria Stock</h3>
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Categoria *</label>
+        <input type="text" id="modalCatName" placeholder="es. Attrezzatura Campo, Cucina..." class="w-full p-2 border rounded-lg text-sm outline-none">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeCategoryModal()" class="px-4 py-2 border rounded-lg text-sm text-stone-600">Annulla</button>
+        <button onclick="saveCategoryModal()" class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold">Crea Categoria</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE AGGIUNTA NUOVA BRANCA -->
+  <div id="modalBranch" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-bold text-stone-800">Aggiungi Nuova Branca Scout</h3>
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Branca (es. Pionieri, Rover) *</label>
+        <input type="text" id="modalBranchName" placeholder="es. Pionieri" class="w-full p-2 border rounded-lg text-sm outline-none">
+      </div>
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Passkey Famiglia per accesso *</label>
+        <input type="text" id="modalBranchPass" placeholder="es. Semprepronti" class="w-full p-2 border rounded-lg text-sm outline-none font-mono">
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeNewBranchModal()" class="px-4 py-2 border rounded-lg text-sm text-stone-600">Annulla</button>
+        <button onclick="saveNewBranchModal()" class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold">Crea Branca</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE AGGIUNTA/MODIFICA ARTICOLO STOCK -->
+  <div id="modalArticle" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-bold text-stone-800" id="modalArticleTitle">Nuovo Articolo Stock</h3>
+
+      <input type="hidden" id="modalArtId">
+
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Articolo *</label>
+        <input type="text" id="modalArtName" required class="w-full p-2 border rounded-lg text-sm">
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Categoria *</label>
+          <select id="modalArtCategory" class="w-full p-2 border rounded-lg text-sm"></select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Branca Scout *</label>
+          <select id="modalArtBranch" class="w-full p-2 border rounded-lg text-sm">
+            <option value="Tutti">Tutti / Generico</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Prezzo (CHF) *</label>
+          <input type="number" step="0.05" id="modalArtPrice" required class="w-full p-2 border rounded-lg text-sm">
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Giacenza / Stock *</label>
+          <input type="number" id="modalArtStock" required class="w-full p-2 border rounded-lg text-sm">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Taglie/Misure (opzionale)</label>
+        <input type="text" id="modalArtSizes" placeholder="es. S, M, L oppure Unica" class="w-full p-2 border rounded-lg text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Codice / SKU Hajk.ch</label>
+        <input type="text" id="modalArtSKU" placeholder="es. HAJK-7842" class="w-full p-2 border rounded-lg text-sm font-mono">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">URL Pagina Hajk.ch (Link Diretto)</label>
+        <input type="url" id="modalArtHajkUrl" placeholder="https://www.hajk.ch/it/..." class="w-full p-2 border rounded-lg text-sm">
+      </div>
+
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Immagine Articolo</label>
+        <div class="flex gap-2 items-center">
+          <input type="file" accept="image/*" onchange="handleImageUpload(event, 'modalArtImgPreview')" class="text-xs w-full border rounded p-1">
+        </div>
+        <input type="hidden" id="modalArtImgData">
+        <img id="modalArtImgPreview" src="" class="hidden h-16 mt-2 rounded border object-cover">
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeArticleModal()" class="px-4 py-2 border rounded-lg text-sm font-medium text-stone-600 hover:bg-stone-100">Annulla</button>
+        <button onclick="saveArticleModal()" class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold">Salva Articolo</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE DETTAGLIO COMANDA & STAMPA -->
+  <div id="modalOrderDetail" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-stone-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-start border-b pb-3">
+        <div>
+          <span class="text-xs font-bold text-amber-600 uppercase" id="detOrderBranch">Comanda</span>
+          <h3 class="text-lg font-bold text-stone-800" id="detOrderId">Comanda #1001</h3>
+          <p class="text-xs text-stone-500" id="detOrderDate">Data: 2026-10-23</p>
+        </div>
+        <button onclick="closeOrderDetailModal()" class="text-stone-400 hover:text-stone-600 print:hidden"><i class="fa-solid fa-xmark text-xl"></i></button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-4 text-xs bg-stone-50 p-3 rounded-lg">
+        <div>
+          <span class="font-bold text-stone-500 block">PARTECIPANTE</span>
+          <span class="font-bold text-stone-800 text-sm" id="detChildName">-</span>
+        </div>
+        <div>
+          <span class="font-bold text-stone-500 block">GENITORE / RECAPITO</span>
+          <span class="font-semibold text-stone-800" id="detParentName">-</span>
+          <div id="detParentContact" class="text-stone-600">-</div>
+        </div>
+      </div>
+
+      <div>
+        <h4 class="text-xs font-bold text-stone-500 uppercase mb-2">Articoli Ordinati</h4>
+        <div id="detOrderItemsList" class="space-y-1.5 border-t border-b py-2 text-sm"></div>
+        <div class="flex justify-between items-center mt-3 pt-2 font-bold text-base">
+          <span>Totale Indicativo:</span>
+          <span class="text-amber-800" id="detOrderTotal">CHF 0.00</span>
+        </div>
+      </div>
+
+      <div class="text-[11px] text-stone-500 italic bg-amber-50 p-2.5 rounded border border-amber-200">
+        L'ordinazione è vincolante e la fattura sarà consegnata assieme alla merce. Prezzi netti in CHF.
+      </div>
+
+      <div class="border-t pt-2">
+        <span class="text-xs font-bold text-stone-500 uppercase block mb-1">Firma Elettronica</span>
+        <img id="detOrderSignature" src="" alt="Firma" class="h-16 border rounded bg-stone-50 p-1">
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 print:hidden">
+        <button onclick="window.print()" class="px-4 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-sm font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-print"></i> Stampa Scheda
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE IMPOSTAZIONI ANIMATORI -->
+  <div id="modalSettings" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-bold text-stone-800 border-b pb-2 flex items-center gap-2">
+        <i class="fa-solid fa-gear text-emerald-700"></i> Impostazioni & Cloud Sync
+      </h3>
+
+      <div class="space-y-3 text-xs">
+        <div class="bg-amber-50 p-3 rounded-lg border border-amber-200 space-y-2">
+          <label class="block font-bold text-amber-900 flex items-center gap-1">
+            <i class="fa-solid fa-cloud text-amber-600"></i> Cloud JSONBin.io (Preconfigurato)
+          </label>
+          <div>
+            <label class="block text-[10px] font-bold text-stone-500 uppercase">Bin ID</label>
+            <input type="text" id="cfgJsonBinId" class="w-full p-2 border rounded font-mono text-stone-800 bg-white">
+          </div>
+          <div>
+            <label class="block text-[10px] font-bold text-stone-500 uppercase">Master API Key</label>
+            <input type="password" id="cfgJsonApiKey" class="w-full p-2 border rounded font-mono text-stone-800 bg-white">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Password Area Animatori (Master)</label>
+          <input type="text" id="cfgMasterPass" class="w-full p-2 border rounded-lg font-mono">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 border rounded-lg text-sm text-stone-600">Annulla</button>
+        <button onclick="saveSettingsModal()" class="px-4 py-2 bg-emerald-700 text-white rounded-lg text-sm font-semibold">Salva Impostazioni</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICAZIONE -->
+  <script>
+    const DEFAULT_CONFIG = {
+      masterPass: "Scout2026",
+      jsonBinId: "6adb22a4ac6210605a4b5a04",
+      jsonApiKey: "$2a$10$5mugUohBQugLGt.XahBL5eYbQ88BCDPYPNKqUE3e68gOtC1K0NF.e",
+      categories: ["Abbigliamento", "Patacche", "Materiale didattico", "Altro"],
+      branches: {
+        lupetti: {
+          name: "Lupetti",
+          passcode: "Delnostromeglio",
+          childLabel: "Dati del Lupetto",
+          intro: "Benvenuti nel formulario d'ordine per la branca Lupetti! Seleziona il materiale necessario per l'uniforme e le attività.",
+          docs: [],
+          activeArticles: [1, 2, 3]
+        },
+        esploratori: {
+          name: "Esploratori",
+          passcode: "Semprepronti",
+          childLabel: "Dati dell'Esploratore",
+          intro: "Formulario ufficiale materiale per la branca Esploratori. Ordina qui camicia, distintivi ed equipaggiamento.",
+          docs: [],
+          activeArticles: [1, 2, 4]
+        }
+      }
+    };
+
+    const DEFAULT_ARTICLES = [
+      { id: 1, name: "Camicia Scout Ufficiale", category: "Abbigliamento", branch: "Tutti", price: 48.00, stock: 12, sizes: "XXS, XS, S, M, L, XL", sku: "HAJK-101", hajkUrl: "https://www.hajk.ch/it/camicia-scout-svizzera", imageUrl: "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300" },
+      { id: 2, name: "Foulard Sezione", category: "Abbigliamento", branch: "Tutti", price: 15.00, stock: 25, sizes: "Unica", sku: "HAJK-202", hajkUrl: "https://www.hajk.ch/it/foulard-scout", imageUrl: "https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=300" },
+      { id: 3, name: "Lupo di Ramo (Patacca)", category: "Patacche", branch: "Lupetti", price: 3.50, stock: 40, sizes: "Unica", sku: "HAJK-303", hajkUrl: "https://www.hajk.ch/it/distintivi-scout", imageUrl: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=300" },
+      { id: 4, name: "Quaderno di Caccia", category: "Materiale didattico", branch: "Esploratori", price: 8.50, stock: 18, sizes: "Unica", sku: "HAJK-404", hajkUrl: "https://www.hajk.ch/it/quaderno-scout", imageUrl: "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=300" }
+    ];
+
+    let config = JSON.parse(localStorage.getItem('scout_config')) || DEFAULT_CONFIG;
+    if (!config.jsonBinId) config.jsonBinId = DEFAULT_CONFIG.jsonBinId;
+    if (!config.jsonApiKey) config.jsonApiKey = DEFAULT_CONFIG.jsonApiKey;
+
+    let articles = JSON.parse(localStorage.getItem('scout_articles')) || DEFAULT_ARTICLES;
+    let orders = JSON.parse(localStorage.getItem('scout_orders')) || [];
+    let currentRole = null; 
+    let currentFamilyBranch = null; 
+    let currentEditingBranch = Object.keys(config.branches)[0] || 'lupetti';
+    let canvas, ctx, isDrawing = false;
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvas();
+      if (config.jsonBinId && config.jsonApiKey) {
+        syncDataFromCloud();
+      }
+    });
+
+    async function saveState() {
+      localStorage.setItem('scout_config', JSON.stringify(config));
+      localStorage.setItem('scout_articles', JSON.stringify(articles));
+      localStorage.setItem('scout_orders', JSON.stringify(orders));
+
+      if (config.jsonBinId && config.jsonApiKey) {
+        try {
+          await fetch(`https://api.jsonbin.io/v3/b/${config.jsonBinId}`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Master-Key': config.jsonApiKey
+            },
+            body: JSON.stringify({ config, articles, orders })
+          });
+        } catch (err) {
+          console.error("Errore salvataggio Cloud JSONBin:", err);
+        }
+      }
+    }
+
+    async function syncDataFromCloud() {
+      if (!config.jsonBinId || !config.jsonApiKey) return;
+      try {
+        const res = await fetch(`https://api.jsonbin.io/v3/b/${config.jsonBinId}/latest`, {
+          headers: { 'X-Master-Key': config.jsonApiKey }
+        });
+        const data = await res.json();
+        if (data.record) {
+          if (data.record.config) config = { ...config, ...data.record.config };
+          if (data.record.articles) articles = data.record.articles;
+          if (data.record.orders) orders = data.record.orders;
+
+          localStorage.setItem('scout_config', JSON.stringify(config));
+          localStorage.setItem('scout_articles', JSON.stringify(articles));
+          localStorage.setItem('scout_orders', JSON.stringify(orders));
+
+          if (currentRole === 'admin') {
+            renderStockTables();
+            renderOrdersTable();
+            renderEditorBranch();
+          } else if (currentRole === 'family') {
+            renderFamilyForm();
+          }
+        }
+      } catch (err) {
+        console.error("Errore sincronizzazione Cloud:", err);
+      }
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        config.branches[currentEditingBranch].docs.push({ title: file.name, dataUrl: evt.target.result });
+        saveState();
+        renderEditorBranch();
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function handleImageUpload(e, previewId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        document.getElementById('modalArtImgData').value = evt.target.result;
+        const img = document.getElementById(previewId);
+        img.src = evt.target.result;
+        img.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // AUTH
+    function loginFamiglia() {
+      const code = document.getElementById('inputPasscodeFamiglia').value.trim();
+      let matchedBranch = null;
+
+      for (const [key, bData] of Object.entries(config.branches)) {
+        if (code.toLowerCase() === bData.passcode.toLowerCase()) {
+          matchedBranch = key;
+          break;
+        }
+      }
+
+      if (matchedBranch) {
+        currentRole = 'family';
+        currentFamilyBranch = matchedBranch;
+        setupView();
+      } else {
+        alert("Codice branca errato!");
+      }
+    }
+
+    function loginMaster() {
+      const pass = document.getElementById('inputPasscodeMaster').value.trim();
+      if (pass === config.masterPass) {
+        currentRole = 'admin';
+        setupView();
+      } else {
+        alert("Password Animatori non corretta.");
+      }
+    }
+
+    function logout() {
+      currentRole = null; currentFamilyBranch = null;
+      document.getElementById('inputPasscodeFamiglia').value = '';
+      document.getElementById('inputPasscodeMaster').value = '';
+      setupView();
+    }
+
+    function goHome() { if (currentRole === 'admin') showTab('stock'); }
+
+    function setupView() {
+      const secLogin = document.getElementById('sec-login');
+      const adminNav = document.getElementById('adminNav');
+      const familyBadge = document.getElementById('familyBadge');
+      const secStock = document.getElementById('sec-stock');
+      const secEditor = document.getElementById('sec-editor');
+      const secOrders = document.getElementById('sec-orders');
+      const secFamilyForm = document.getElementById('sec-family-form');
+
+      [secLogin, secStock, secEditor, secOrders, secFamilyForm].forEach(el => el.classList.add('hidden'));
+      adminNav.classList.add('hidden');
+      familyBadge.classList.add('hidden');
+
+      if (!currentRole) {
+        secLogin.classList.remove('hidden');
+      } else if (currentRole === 'admin') {
+        adminNav.classList.remove('hidden');
+        showTab('stock');
+      } else if (currentRole === 'family') {
+        familyBadge.classList.remove('hidden');
+        document.getElementById('familyBadgeText').innerText = `Branca ${config.branches[currentFamilyBranch].name}`;
+        secFamilyForm.classList.remove('hidden');
+        renderFamilyForm();
+        setTimeout(resizeCanvas, 200);
+      }
+    }
+
+    function showTab(tabName) {
+      if (currentRole !== 'admin') return;
+      ['stock', 'editor', 'orders'].forEach(t => {
+        document.getElementById(`sec-${t}`).classList.add('hidden');
+        const btn = document.getElementById(`btn-${t}`);
+        if (btn) btn.className = "px-3 py-1.5 rounded-lg text-sm font-medium transition-all text-emerald-200 hover:text-white hover:bg-emerald-800/50";
+      });
+
+      document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+      const activeBtn = document.getElementById(`btn-${tabName}`);
+      if (activeBtn) activeBtn.className = "px-3 py-1.5 rounded-lg text-sm font-medium transition-all bg-emerald-700 text-white shadow";
+
+      if (tabName === 'stock') renderStockTables();
+      if (tabName === 'editor') renderEditorBranch();
+      if (tabName === 'orders') renderOrdersTable();
+    }
+
+    // STOCK CON IMMAGINI VISIBILI
+    function renderStockTables() {
+      const container = document.getElementById('stockCategoryContainers');
+      const filter = document.getElementById('stockSearch').value.toLowerCase();
+      container.innerHTML = "";
+
+      config.categories.forEach(cat => {
+        const catArticles = articles.filter(a => a.category === cat && (a.name.toLowerCase().includes(filter) || (a.sku && a.sku.toLowerCase().includes(filter))));
+
+        const catBox = document.createElement('div');
+        catBox.className = "bg-white rounded-xl shadow-sm border border-stone-200 overflow-hidden";
+        
+        let rowsHtml = "";
+        if (catArticles.length === 0) {
+          rowsHtml = `<tr><td colspan="6" class="p-4 text-center text-xs text-stone-400">Nessun articolo in questa categoria.</td></tr>`;
+        } else {
+          catArticles.forEach(a => {
+            rowsHtml += `
+              <tr class="hover:bg-stone-50 transition-colors">
+                <td class="p-3">
+                  <div class="flex items-center gap-3">
+                    <img src="${a.imageUrl || 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300'}" class="w-10 h-10 object-cover rounded border bg-stone-100 flex-shrink-0">
+                    <div>
+                      <div class="font-bold text-stone-800 flex items-center gap-2">
+                        ${a.name}
+                        <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-900 border border-emerald-200">${a.branch || 'Tutti'}</span>
+                      </div>
+                      ${a.sizes ? `<div class="text-[11px] text-stone-500">Misure: ${a.sizes}</div>` : ''}
+                    </div>
+                  </div>
+                </td>
+                <td class="p-3 font-mono text-xs text-stone-600">
+                  ${a.sku ? `<span class="bg-stone-100 px-1.5 py-0.5 rounded border border-stone-200">${a.sku}</span>` : '<span class="text-stone-300">-</span>'}
+                </td>
+                <td class="p-3 font-bold text-emerald-800">CHF ${a.price.toFixed(2)}</td>
+                <td class="p-3">
+                  <div class="flex items-center gap-2">
+                    <button onclick="updateStock(${a.id}, -1)" class="w-6 h-6 rounded bg-stone-200 hover:bg-stone-300 font-bold flex items-center justify-center text-xs">-</button>
+                    <span class="font-bold w-8 text-center ${a.stock < 5 ? 'text-rose-600 font-black' : 'text-stone-700'}">${a.stock}</span>
+                    <button onclick="updateStock(${a.id}, 1)" class="w-6 h-6 rounded bg-stone-200 hover:bg-stone-300 font-bold flex items-center justify-center text-xs">+</button>
+                  </div>
+                </td>
+                <td class="p-3 text-xs">
+                  ${a.hajkUrl ? `<a href="${a.hajkUrl}" target="_blank" class="text-amber-700 hover:underline font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Hajk.ch</a>` : '<span class="text-stone-300">-</span>'}
+                </td>
+                <td class="p-3 text-right space-x-1">
+                  <button onclick="editArticle(${a.id})" class="text-stone-500 hover:text-emerald-700 p-1"><i class="fa-solid fa-pen"></i></button>
+                  <button onclick="deleteArticle(${a.id})" class="text-stone-400 hover:text-rose-600 p-1"><i class="fa-solid fa-trash"></i></button>
+                </td>
+              </tr>
+            `;
+          });
+        }
+
+        catBox.innerHTML = `
+          <div class="bg-stone-100 p-3 border-b flex justify-between items-center">
+            <h3 class="font-bold text-stone-700 text-sm flex items-center gap-2">
+              <i class="fa-solid fa-tag text-emerald-700"></i> ${cat}
+            </h3>
+            <span class="text-xs bg-white px-2 py-0.5 rounded-full border text-stone-600 font-semibold">${catArticles.length} articoli</span>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="text-[11px] font-bold text-stone-400 uppercase border-b bg-stone-50/50">
+                  <th class="p-3">Articolo / Immagine</th>
+                  <th class="p-3">SKU</th>
+                  <th class="p-3">Prezzo</th>
+                  <th class="p-3">Giacenza</th>
+                  <th class="p-3">Link Hajk</th>
+                  <th class="p-3 text-right">Azioni</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-stone-100">${rowsHtml}</tbody>
+            </table>
+          </div>
+        `;
+        container.appendChild(catBox);
+      });
+    }
+
+    function updateStock(id, delta) {
+      const art = articles.find(a => a.id === id);
+      if (art) { art.stock = Math.max(0, art.stock + delta); saveState(); renderStockTables(); }
+    }
+
+    function openCategoryModal() { document.getElementById('modalCategory').classList.remove('hidden'); }
+    function closeCategoryModal() { document.getElementById('modalCategory').classList.add('hidden'); }
+    function saveCategoryModal() {
+      const name = document.getElementById('modalCatName').value.trim();
+      if (name && !config.categories.includes(name)) {
+        config.categories.push(name);
+        saveState();
+        closeCategoryModal();
+        renderStockTables();
+      }
+    }
+
+    // GESTIONE NUOVA BRANCA
+    function openNewBranchModal() { document.getElementById('modalBranch').classList.remove('hidden'); }
+    function closeNewBranchModal() { document.getElementById('modalBranch').classList.add('hidden'); }
+    function saveNewBranchModal() {
+      const name = document.getElementById('modalBranchName').value.trim();
+      const passcode = document.getElementById('modalBranchPass').value.trim();
+      if (!name || !passcode) { alert("Inserisci nome e passkey"); return; }
+      
+      const key = name.toLowerCase().replace(/\s+/g, '_');
+      config.branches[key] = {
+        name: name,
+        passcode: passcode,
+        childLabel: `Dati del ${name}`,
+        intro: `Benvenuti nel formulario d'ordine per la branca ${name}!`,
+        docs: [],
+        activeArticles: []
+      };
+
+      saveState();
+      closeNewBranchModal();
+      switchEditorBranch(key);
+      alert(`Branca ${name} creata con successo!`);
+    }
+
+    function openArticleModal(art = null) {
+      document.getElementById('modalArticleTitle').innerText = art ? "Modifica Articolo" : "Nuovo Articolo Stock";
+      document.getElementById('modalArtId').value = art ? art.id : "";
+      document.getElementById('modalArtName').value = art ? art.name : "";
+      
+      const catSelect = document.getElementById('modalArtCategory');
+      catSelect.innerHTML = config.categories.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (art) catSelect.value = art.category;
+
+      const branchSelect = document.getElementById('modalArtBranch');
+      branchSelect.innerHTML = `<option value="Tutti">Tutti / Generico</option>` + 
+        Object.values(config.branches).map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+      if (art) branchSelect.value = art.branch || "Tutti";
+
+      document.getElementById('modalArtPrice').value = art ? art.price : "";
+      document.getElementById('modalArtStock').value = art ? art.stock : "10";
+      document.getElementById('modalArtSizes').value = art ? art.sizes || "" : "";
+      document.getElementById('modalArtSKU').value = art ? art.sku || "" : "";
+      document.getElementById('modalArtHajkUrl').value = art ? art.hajkUrl || "" : "";
+      
+      const preview = document.getElementById('modalArtImgPreview');
+      if (art && art.imageUrl) {
+        document.getElementById('modalArtImgData').value = art.imageUrl;
+        preview.src = art.imageUrl;
+        preview.classList.remove('hidden');
+      } else {
+        document.getElementById('modalArtImgData').value = "";
+        preview.classList.add('hidden');
+      }
+
+      document.getElementById('modalArticle').classList.remove('hidden');
+    }
+
+    function closeArticleModal() { document.getElementById('modalArticle').classList.add('hidden'); }
+
+    function saveArticleModal() {
+      const id = document.getElementById('modalArtId').value;
+      const name = document.getElementById('modalArtName').value.trim();
+      const category = document.getElementById('modalArtCategory').value;
+      const branch = document.getElementById('modalArtBranch').value;
+      const price = parseFloat(document.getElementById('modalArtPrice').value) || 0;
+      const stock = parseInt(document.getElementById('modalArtStock').value) || 0;
+      const sizes = document.getElementById('modalArtSizes').value.trim();
+      const sku = document.getElementById('modalArtSKU').value.trim();
+      const hajkUrl = document.getElementById('modalArtHajkUrl').value.trim();
+      const imageUrl = document.getElementById('modalArtImgData').value || "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300";
+
+      if (!name) { alert("Inserisci il nome dell'articolo"); return; }
+
+      if (id) {
+        const art = articles.find(a => a.id === parseInt(id));
+        if (art) Object.assign(art, { name, category, branch, price, stock, sizes, sku, hajkUrl, imageUrl });
+      } else {
+        const newId = articles.length ? Math.max(...articles.map(a => a.id)) + 1 : 1;
+        articles.push({ id: newId, name, category, branch, price, stock, sizes, sku, hajkUrl, imageUrl });
+      }
+
+      saveState();
+      closeArticleModal();
+      renderStockTables();
+      if (currentRole === 'admin') renderEditorBranch();
+    }
+
+    function editArticle(id) { const art = articles.find(a => a.id === id); if (art) openArticleModal(art); }
+    function deleteArticle(id) {
+      if (confirm("Eliminare definitivamente questo articolo?")) {
+        articles = articles.filter(a => a.id !== id);
+        saveState();
+        renderStockTables();
+        if (currentRole === 'admin') renderEditorBranch();
+      }
+    }
+
+    // EDITOR MODULI
+    function switchEditorBranch(branchKey) {
+      currentEditingBranch = branchKey;
+      const tabsCont = document.getElementById('editorBranchTabs');
+      tabsCont.innerHTML = "";
+
+      Object.entries(config.branches).forEach(([key, bData]) => {
+        const isActive = key === currentEditingBranch;
+        tabsCont.innerHTML += `
+          <button onclick="switchEditorBranch('${key}')" class="px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${isActive ? 'bg-amber-500 text-white shadow-sm' : 'bg-stone-100 text-stone-600 hover:bg-stone-200'}">
+            ${bData.name}
+          </button>
+        `;
+      });
+
+      renderEditorBranch();
+    }
+
+    function renderEditorBranch() {
+      const bData = config.branches[currentEditingBranch];
+      if (!bData) return;
+      document.getElementById('editorBranchTitle').innerText = bData.name;
+      document.getElementById('editorIntroText').value = bData.intro;
+
+      const docsList = document.getElementById('editorDocList');
+      docsList.innerHTML = "";
+      (bData.docs || []).forEach((doc, idx) => {
+        docsList.innerHTML += `
+          <div class="flex gap-2 items-center text-xs bg-stone-50 p-2 rounded border">
+            <i class="fa-solid fa-file-pdf text-rose-600"></i>
+            <span class="font-bold flex-grow truncate">${doc.title}</span>
+            <a href="${doc.dataUrl}" download="${doc.title}" class="text-emerald-700 hover:underline"><i class="fa-solid fa-download"></i></a>
+            <button onclick="removeDoc(${idx})" class="text-rose-500 ml-1"><i class="fa-solid fa-xmark"></i></button>
+          </div>
+        `;
+      });
+
+      const artCont = document.getElementById('editorArticlesContainer');
+      artCont.innerHTML = "";
+
+      articles.forEach(art => {
+        const isChecked = bData.activeArticles.includes(art.id);
+
+        artCont.innerHTML += `
+          <div class="p-3 border rounded-lg space-y-2 ${isChecked ? 'bg-amber-50/40 border-amber-200' : 'bg-stone-50 border-stone-200'}">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleBranchArticle(${art.id}, this.checked)" class="w-4 h-4 accent-amber-600 rounded">
+                <span class="font-bold text-xs uppercase text-stone-500">Mostra nel formulario</span>
+              </div>
+              <span class="text-[10px] px-2 py-0.5 rounded font-bold bg-emerald-100 text-emerald-900">${art.branch || 'Tutti'}</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-center">
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase">Nome Prodotto</label>
+                <input type="text" value="${art.name}" onchange="updateArticleField(${art.id}, 'name', this.value)" class="w-full text-xs p-1.5 border rounded font-bold">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase">Prezzo (CHF)</label>
+                <input type="number" step="0.5" value="${art.price}" onchange="updateArticleField(${art.id}, 'price', parseFloat(this.value))" class="w-full text-xs p-1.5 border rounded font-bold text-emerald-800">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase">Codice Hajk</label>
+                <input type="text" value="${art.sku || ''}" onchange="updateArticleField(${art.id}, 'sku', this.value)" class="w-full text-xs p-1.5 border rounded font-mono">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase">Link Diretto Hajk.ch</label>
+                <input type="url" value="${art.hajkUrl || ''}" placeholder="https://www.hajk.ch/..." onchange="updateArticleField(${art.id}, 'hajkUrl', this.value)" class="w-full text-xs p-1.5 border rounded">
+              </div>
+
+              <div class="flex items-center gap-3 pt-1">
+                <img src="${art.imageUrl || 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300'}" class="w-8 h-8 object-cover rounded border">
+                <div class="flex-grow">
+                  <label class="block text-[10px] font-bold text-stone-500 uppercase">Immagine Prodotto</label>
+                  <input type="file" accept="image/*" onchange="uploadDirectArticleImage(event, ${art.id})" class="text-[10px] w-full">
+                </div>
+                <button onclick="deleteArticle(${art.id})" class="text-rose-500 text-xs p-1 hover:bg-rose-100 rounded"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function updateArticleField(id, field, value) {
+      const art = articles.find(a => a.id === id);
+      if (art) { art[field] = value; saveState(); }
+    }
+
+    function uploadDirectArticleImage(e, artId) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        const art = articles.find(a => a.id === artId);
+        if (art) { art.imageUrl = evt.target.result; saveState(); renderEditorBranch(); }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function toggleBranchArticle(artId, active) {
+      const bData = config.branches[currentEditingBranch];
+      if (active) { if (!bData.activeArticles.includes(artId)) bData.activeArticles.push(artId); }
+      else { bData.activeArticles = bData.activeArticles.filter(id => id !== artId); }
+      saveState();
+    }
+
+    function removeDoc(idx) {
+      config.branches[currentEditingBranch].docs.splice(idx, 1);
+      saveState();
+      renderEditorBranch();
+    }
+
+    function saveEditorBranchConfig() {
+      config.branches[currentEditingBranch].intro = document.getElementById('editorIntroText').value.trim();
+      saveState();
+      alert("Impostazioni salvate con successo!");
+    }
+
+    // FORMULARIO FAMIGLIE
+    function renderFamilyForm() {
+      const bData = config.branches[currentFamilyBranch];
+      const header = document.getElementById('familyBranchHeader');
+
+      header.innerHTML = `
+        <div class="flex items-center gap-3">
+          <span class="bg-white/20 p-2 rounded-lg font-bold text-lg"><i class="fa-solid fa-campground"></i></span>
+          <div>
+            <h2 class="text-2xl font-bold">Modulo Ordine Materiale - Branca ${bData.name}</h2>
+          </div>
+        </div>
+        <p class="text-xs bg-black/10 p-2.5 rounded-lg leading-relaxed mt-2">${bData.intro}</p>
+      `;
+
+      document.getElementById('lblChildName').innerText = `${bData.childLabel} *`;
+
+      const docBox = document.getElementById('familyDocsContainer');
+      const docList = document.getElementById('familyDocsList');
+      if (bData.docs && bData.docs.length > 0) {
+        docBox.classList.remove('hidden');
+        docList.innerHTML = bData.docs.map(d => `
+          <a href="${d.dataUrl}" download="${d.title}" class="inline-flex items-center gap-2 bg-stone-100 hover:bg-amber-100 text-stone-700 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all">
+            <i class="fa-solid fa-file-pdf text-rose-600"></i> ${d.title}
+          </a>
+        `).join('');
+      } else {
+        docBox.classList.add('hidden');
+      }
+
+      const catalog = document.getElementById('familyCatalogList');
+      catalog.innerHTML = "";
+
+      const activeArts = articles.filter(a => bData.activeArticles.includes(a.id));
+
+      if (activeArts.length === 0) {
+        catalog.innerHTML = `<p class="text-xs text-stone-500 italic col-span-2">Nessun articolo disponibile per questa branca al momento.</p>`;
+        return;
+      }
+
+      activeArts.forEach(art => {
+        const sizesArr = art.sizes ? art.sizes.split(',').map(s => s.trim()) : [];
+        
+        catalog.innerHTML += `
+          <div class="border rounded-xl p-3 flex gap-3 bg-stone-50/50 hover:bg-white transition-all">
+            <img src="${art.imageUrl || 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=300'}" class="w-20 h-20 object-cover rounded-lg border bg-white flex-shrink-0">
+            
+            <div class="flex-grow space-y-1">
+              <div class="font-bold text-sm text-stone-800">${art.name}</div>
+              
+              <div class="flex items-center justify-between">
+                <div class="text-xs font-bold text-emerald-800">CHF ${art.price.toFixed(2)} ${art.sku ? `<span class="text-[10px] text-stone-400 font-normal">(${art.sku})</span>` : ''}</div>
+                ${art.hajkUrl ? `<a href="${art.hajkUrl}" target="_blank" class="text-[11px] text-amber-700 hover:text-amber-800 font-semibold flex items-center gap-1"><i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i> Vedi su Hajk.ch</a>` : ''}
+              </div>
+
+              <div class="grid grid-cols-2 gap-2 pt-1">
+                ${sizesArr.length > 0 ? `
+                  <select id="size_${art.id}" class="text-xs p-1 border rounded outline-none bg-white">
+                    ${sizesArr.map(s => `<option value="${s}">${s}</option>`).join('')}
+                  </select>
+                ` : `<input type="hidden" id="size_${art.id}" value="Unica">`}
+
+                <select id="qty_${art.id}" onchange="calculateOrderTotal()" class="text-xs p-1 border rounded outline-none font-bold bg-white">
+                  <option value="0">Qty: 0</option>
+                  <option value="1">Qty: 1</option>
+                  <option value="2">Qty: 2</option>
+                  <option value="3">Qty: 3</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+
+      calculateOrderTotal();
+    }
+
+    function calculateOrderTotal() {
+      if (!currentFamilyBranch) return;
+      const bData = config.branches[currentFamilyBranch];
+      const activeArts = articles.filter(a => bData.activeArticles.includes(a.id));
+      let total = 0;
+
+      activeArts.forEach(art => {
+        const qtyEl = document.getElementById(`qty_${art.id}`);
+        if (qtyEl) {
+          const qty = parseInt(qtyEl.value) || 0;
+          total += qty * art.price;
+        }
+      });
+
+      document.getElementById('orderTotalDisplay').innerText = `CHF ${total.toFixed(2)}`;
+    }
+
+    // CANVAS FIRMA CON GESTIONE RIDIMENSIONAMENTO SICURA (NON SI CANCELLA)
+    function initCanvas() {
+      canvas = document.getElementById('sigCanvas');
+      if (!canvas) return;
+      ctx = canvas.getContext('2d');
+      ctx.strokeStyle = "#0f172a";
+      ctx.lineWidth = 2.5;
+      ctx.lineCap = "round";
+
+      window.addEventListener('resize', resizeCanvas);
+
+      const getPos = (e) => {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      };
+
+      const start = (e) => { isDrawing = true; const p = getPos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); };
+      const move = (e) => { if (!isDrawing) return; e.preventDefault(); const p = getPos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); };
+      const stop = () => { isDrawing = false; };
+
+      canvas.addEventListener('mousedown', start);
+      canvas.addEventListener('mousemove', move);
+      canvas.addEventListener('mouseup', stop);
+      canvas.addEventListener('mouseleave', stop);
+
+      canvas.addEventListener('touchstart', start, { passive: false });
+      canvas.addEventListener('touchmove', move, { passive: false });
+      canvas.addEventListener('touchend', stop);
+    }
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      if (rect.width > 0 && canvas.width !== rect.width) {
+        const dataURL = canvas.toDataURL();
+        canvas.width = rect.width;
+        canvas.height = 130;
+        ctx.strokeStyle = "#0f172a";
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        const img = new Image();
+        img.onload = () => { ctx.drawImage(img, 0, 0); };
+        img.src = dataURL;
+      }
+    }
+
+    function clearSignature() { if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    function isCanvasBlank() {
+      const pixelBuffer = new Uint32Array(ctx.getImageData(0, 0, canvas.width, canvas.height).data.buffer);
+      return !pixelBuffer.some(color => color !== 0);
+    }
+
+    async function handleOrderSubmit(e) {
+      e.preventDefault();
+
+      if (isCanvasBlank()) { alert("Inserisci la firma elettronica prima di procedere."); return; }
+
+      const bData = config.branches[currentFamilyBranch];
+      const activeArts = articles.filter(a => bData.activeArticles.includes(a.id));
+      const items = [];
+      let total = 0;
+
+      activeArts.forEach(art => {
+        const qtyEl = document.getElementById(`qty_${art.id}`);
+        const sizeEl = document.getElementById(`size_${art.id}`);
+        if (qtyEl) {
+          const qty = parseInt(qtyEl.value) || 0;
+          if (qty > 0) {
+            const size = sizeEl ? sizeEl.value : "Unica";
+            const lineTotal = qty * art.price;
+            total += lineTotal;
+            items.push({ articleId: art.id, name: art.name, sku: art.sku || '-', hajkUrl: art.hajkUrl || '', price: art.price, qty, size, lineTotal });
+          }
+        }
+      });
+
+      if (items.length === 0) { alert("Seleziona almeno un articolo da ordinare!"); return; }
+
+      const newOrder = {
+        id: orders.length ? Math.max(...orders.map(o => o.id)) + 1 : 1001,
+        date: new Date().toISOString().split('T')[0],
+        branchKey: currentFamilyBranch,
+        branchName: bData.name,
+        childName: document.getElementById('inputChildName').value.trim(),
+        parentName: document.getElementById('inputParentName').value.trim(),
+        parentEmail: document.getElementById('inputParentEmail').value.trim(),
+        parentPhone: document.getElementById('inputParentPhone').value.trim(),
+        items,
+        total,
+        signature: canvas.toDataURL(),
+        status: "Ricevuto"
+      };
+
+      orders.push(newOrder);
+      await saveState();
+
+      alert(`Comanda #${newOrder.id} inviata con successo! Grazie per la collaborazione.`);
+      document.getElementById('orderForm').reset();
+      clearSignature();
+      calculateOrderTotal();
+    }
+
+    // ORDERS
+    function renderOrdersTable() {
+      const tbody = document.getElementById('ordersTableBody');
+      const branchFilterSelect = document.getElementById('filterOrderBranch');
+      
+      branchFilterSelect.innerHTML = `<option value="all">Tutte le Branche</option>` +
+        Object.entries(config.branches).map(([k, b]) => `<option value="${k}">${b.name}</option>`).join('');
+
+      const branchFilter = branchFilterSelect.value;
+      tbody.innerHTML = "";
+
+      let filtered = orders;
+      if (branchFilter !== 'all') filtered = orders.filter(o => o.branchKey === branchFilter);
+
+      document.getElementById('ordersCounter').innerText = `Totale: ${filtered.length} comande`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-xs text-stone-400">Nessuna comanda registrata.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(o => {
+        const itemsSummary = o.items.map(i => `${i.qty}x ${i.name} [${i.sku}] (${i.size})`).join(', ');
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-stone-50 transition-colors">
+            <td class="p-3 font-bold">#${o.id}<div class="text-[11px] text-stone-400 font-normal">${o.date}</div></td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-900">${o.branchName}</span></td>
+            <td class="p-3 font-semibold text-stone-800">${o.childName}</td>
+            <td class="p-3 text-xs">
+              <div class="font-bold text-stone-700">${o.parentName}</div>
+              <div class="text-stone-400">${o.parentPhone}</div>
+            </td>
+            <td class="p-3 text-xs max-w-xs truncate" title="${itemsSummary}">${itemsSummary}</td>
+            <td class="p-3 font-bold text-amber-800">CHF ${o.total.toFixed(2)}</td>
+            <td class="p-3">
+              <select onchange="updateOrderStatus(${o.id}, this.value)" class="text-xs p-1 border rounded bg-white font-semibold">
+                <option value="Ricevuto" ${o.status === 'Ricevuto' ? 'selected' : ''}>Ricevuto</option>
+                <option value="In Gestione" ${o.status === 'In Gestione' ? 'selected' : ''}>In Gestione</option>
+                <option value="Consegnato" ${o.status === 'Consegnato' ? 'selected' : ''}>Consegnato</option>
+              </select>
+            </td>
+            <td class="p-3 text-right">
+              <button onclick="viewOrderDetail(${o.id})" class="bg-stone-100 hover:bg-stone-200 text-stone-700 px-2.5 py-1 rounded text-xs font-semibold">Dettagli</button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function updateOrderStatus(id, status) {
+      const o = orders.find(ord => ord.id === id);
+      if (o) { o.status = status; saveState(); }
+    }
+
+    function viewOrderDetail(id) {
+      const o = orders.find(ord => ord.id === id);
+      if (!o) return;
+
+      document.getElementById('detOrderBranch').innerText = `Comanda Branca ${o.branchName}`;
+      document.getElementById('detOrderId').innerText = `Comanda #${o.id}`;
+      document.getElementById('detOrderDate').innerText = `Data invio: ${o.date}`;
+      document.getElementById('detChildName').innerText = o.childName;
+      document.getElementById('detParentName').innerText = o.parentName;
+      document.getElementById('detParentContact').innerText = `Email: ${o.parentEmail} | Tel: ${o.parentPhone}`;
+      document.getElementById('detOrderTotal').innerText = `CHF ${o.total.toFixed(2)}`;
+      document.getElementById('detOrderSignature').src = o.signature;
+
+      const itemsCont = document.getElementById('detOrderItemsList');
+      itemsCont.innerHTML = o.items.map(i => `
+        <div class="flex justify-between items-center py-1 border-b border-stone-100">
+          <div>
+            <span class="font-bold">${i.qty}x</span> ${i.name} 
+            <span class="font-mono text-xs bg-stone-100 px-1 py-0.5 rounded border">Cod. Hajk: ${i.sku || '-'}</span>
+            <span class="text-xs text-stone-400">(${i.size})</span>
+            ${i.hajkUrl ? `<a href="${i.hajkUrl}" target="_blank" class="text-[11px] text-amber-700 hover:underline ml-1"><i class="fa-solid fa-arrow-up-right-from-square"></i> Hajk.ch</a>` : ''}
+          </div>
+          <div class="font-semibold">CHF ${i.lineTotal.toFixed(2)}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('modalOrderDetail').classList.remove('hidden');
+    }
+
+    function closeOrderDetailModal() { document.getElementById('modalOrderDetail').classList.add('hidden'); }
+
+    function exportOrdersCSV() {
+      if (orders.length === 0) { alert("Nessun ordine da esportare"); return; }
+      let csv = "ID;Data;Branca;Partecipante;Genitore;Email;Telefono;Articoli_con_Hajk;Totale_CHF;Stato\n";
+      orders.forEach(o => {
+        const itemsStr = o.items.map(i => `${i.qty}x ${i.name} [Hajk: ${i.sku}] (${i.size})`).join(' | ');
+        csv += `${o.id};${o.date};${o.branchName};"${o.childName}";"${o.parentName}";${o.parentEmail};${o.parentPhone};"${itemsStr}";${o.total.toFixed(2)};${o.status}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `comande_scout_${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+    }
+
+    // SETTINGS
+    function openSettingsModal() {
+      document.getElementById('cfgMasterPass').value = config.masterPass;
+      document.getElementById('cfgJsonBinId').value = config.jsonBinId || "";
+      document.getElementById('cfgJsonApiKey').value = config.jsonApiKey || "";
+      document.getElementById('modalSettings').classList.remove('hidden');
+    }
+
+    function closeSettingsModal() { document.getElementById('modalSettings').classList.add('hidden'); }
+
+    async function saveSettingsModal() {
+      config.masterPass = document.getElementById('cfgMasterPass').value.trim() || config.masterPass;
+      config.jsonBinId = document.getElementById('cfgJsonBinId').value.trim();
+      config.jsonApiKey = document.getElementById('cfgJsonApiKey').value.trim();
+
+      await saveState();
+      closeSettingsModal();
+      alert("Impostazioni e credenziali Cloud salvate correttamente!");
+    }
+  </script>
+</body>
+</html>
