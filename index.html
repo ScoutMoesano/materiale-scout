@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Materiale Scout - Scout del Moesano</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts Inter -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .sig-canvas { 
+      border: 2px dashed #cbd5e1; 
+      border-radius: 1rem; 
+      cursor: crosshair; 
+      background: #ffffff;
+      touch-action: none;
+    }
+  </style>
+</head>
+<body class="bg-stone-100 text-stone-900 min-h-screen flex flex-col antialiased">
+
+  <!-- HEADER PRINCIPALE -->
+  <header class="bg-emerald-950 text-white shadow-md sticky top-0 z-40 border-b border-emerald-900">
+    <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap justify-between items-center gap-4">
+      
+      <!-- LOGO -->
+      <div class="flex items-center gap-3 cursor-pointer group" onclick="goHome()">
+        <div class="bg-gradient-to-br from-amber-400 to-amber-600 p-2.5 rounded-xl text-emerald-950 font-bold shadow-md transform group-hover:scale-105 transition-all">
+          <i class="fa-solid fa-campground text-2xl"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-extrabold tracking-tight leading-tight flex items-center gap-2">
+            Materiale scout
+          </h1>
+          <p class="text-[11px] text-emerald-300 font-medium">Scout del Moesano • Roveredo</p>
+        </div>
+      </div>
+
+      <!-- NAVBAR NAVIGAZIONE (ANIMATORI) -->
+      <nav id="adminNav" class="hidden flex flex-wrap gap-1.5 items-center bg-emerald-900/80 p-1.5 rounded-xl border border-emerald-800">
+        <button onclick="showTab('stock')" id="btn-stock" class="px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 bg-amber-500 text-emerald-950 shadow-sm">
+          <i class="fa-solid fa-boxes-stacked"></i> Stock
+        </button>
+        <button onclick="showTab('editor')" id="btn-editor" class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/60">
+          <i class="fa-solid fa-pen-to-square"></i> Editor Moduli
+        </button>
+        <button onclick="showTab('orders')" id="btn-orders" class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/60 relative">
+          <i class="fa-solid fa-clipboard-list"></i> Comande
+          <span id="ordersBadge" class="hidden absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[10px] font-black px-1.5 py-0.5 rounded-full shadow">0</span>
+        </button>
+        <button onclick="showTab('sezionale')" id="btn-sezionale" class="px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/60 relative">
+          <i class="fa-solid fa-cart-shopping"></i> Comanda Sezionale
+          <span id="sezionaleBadge" class="hidden absolute -top-1.5 -right-1.5 bg-amber-500 text-emerald-950 text-[10px] font-black px-1.5 py-0.5 rounded-full shadow">0</span>
+        </button>
+        <div class="h-4 w-px bg-emerald-700 mx-1"></div>
+        
+        <button onclick="openSettingsModal()" class="p-2 rounded-lg text-xs text-emerald-300 hover:text-white hover:bg-emerald-800/60 ml-1" title="Impostazioni">
+          <i class="fa-solid fa-gear text-sm"></i>
+        </button>
+        <button onclick="logout()" class="p-2 rounded-lg text-xs text-rose-300 hover:text-white hover:bg-rose-900/60" title="Esci">
+          <i class="fa-solid fa-right-from-bracket text-sm"></i>
+        </button>
+      </nav>
+
+      <!-- BADGE FAMIGLIA -->
+      <div id="familyBadge" class="hidden flex items-center gap-2.5 bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-200 px-3.5 py-1.5 rounded-full text-xs font-bold border border-amber-500/30">
+        <i class="fa-solid fa-user-shield text-amber-400"></i>
+        <span id="familyBadgeText">Accesso Famiglia</span>
+        <button onclick="logout()" class="ml-1 text-amber-300 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CORPO PRINCIPALE DELL'APPLICAZIONE -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-6">
+
+    <!-- 0. SCHERMATA INIZIALE DI SCELTA ACCESSO -->
+    <section id="sec-landing" class="max-w-xl mx-auto my-12 bg-white rounded-3xl shadow-xl border border-stone-200/80 overflow-hidden text-center">
+      <div class="bg-gradient-to-br from-emerald-900 via-emerald-950 to-emerald-900 p-8 text-white">
+        <div class="w-20 h-20 bg-amber-500 text-emerald-950 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg transform -rotate-3">
+          <i class="fa-solid fa-campground text-4xl"></i>
+        </div>
+        <h2 class="text-3xl font-black tracking-tight">Materiale scout</h2>
+        <p class="text-xs text-emerald-200/80 mt-2 font-medium">Seleziona una modalità per continuare</p>
+      </div>
+
+      <div class="p-8 space-y-4">
+        <button onclick="showLoginMode('family')" class="w-full bg-amber-500 hover:bg-amber-600 text-emerald-950 font-extrabold p-5 rounded-2xl shadow-md transition-all transform hover:-translate-y-0.5 flex items-center justify-between text-left group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/40 rounded-xl flex items-center justify-center text-emerald-950 text-xl font-bold">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div>
+              <div class="text-base font-black">Ordinazione Famiglie</div>
+              <div class="text-xs text-emerald-950/80 font-medium">Ordina divisa e materiale vario</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-lg group-hover:translate-x-1 transition-transform"></i>
+        </button>
+
+        <button onclick="showLoginMode('admin')" class="w-full bg-emerald-900 hover:bg-emerald-950 text-white font-extrabold p-5 rounded-2xl shadow-md transition-all transform hover:-translate-y-0.5 flex items-center justify-between text-left group">
+          <div class="flex items-center gap-4">
+            <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-amber-400 text-xl font-bold">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div>
+              <div class="text-base font-black">Area Capi & Animatori</div>
+              <div class="text-xs text-emerald-200/80 font-medium">Gestione stock magazzino, comande e moduli</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right text-lg text-amber-400 group-hover:translate-x-1 transition-transform"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- 0B. SCHERMATA SELEZIONE BRANCA PER FAMIGLIE O LOGIN ANIMATORI -->
+    <section id="sec-login" class="hidden max-w-md mx-auto my-12 bg-white rounded-3xl shadow-xl border border-stone-200/80 overflow-hidden">
+      <div class="bg-gradient-to-br from-emerald-900 via-emerald-950 to-emerald-900 p-6 text-white text-center relative">
+        <button onclick="goHome()" class="absolute left-4 top-4 text-emerald-200 hover:text-white text-xs font-bold flex items-center gap-1 bg-white/10 px-3 py-1.5 rounded-xl border border-white/10">
+          <i class="fa-solid fa-arrow-left"></i> Indietro
+        </button>
+        <div class="w-14 h-14 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-3 text-amber-400 border border-white/10 shadow-inner mt-2">
+          <i class="fa-solid fa-users text-2xl" id="loginHeaderIcon"></i>
+        </div>
+        <h2 class="text-xl font-black tracking-tight" id="loginHeaderTitle">Ordinazione Famiglie</h2>
+        <p class="text-xs text-emerald-200/80 mt-1" id="loginHeaderSubtitle">Seleziona la tua branca per aprire il modulo</p>
+      </div>
+
+      <div class="p-6">
+        <div id="formLoginFamily" class="hidden space-y-3">
+          <div id="familyBranchButtons" class="space-y-3"></div>
+        </div>
+
+        <div id="formLoginAdmin" class="hidden space-y-4">
+          <div class="space-y-3 bg-emerald-50/70 p-4 rounded-2xl border border-emerald-200/80">
+            <label class="block text-xs font-bold uppercase tracking-wider text-emerald-900 flex items-center gap-2">
+              <i class="fa-solid fa-user-gear text-emerald-700"></i> Password Area Animatori
+            </label>
+            <input type="password" id="inputPasscodeMaster" placeholder="Password animatori..." class="w-full px-3.5 py-2.5 border border-emerald-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none text-stone-800 bg-white text-sm">
+            <button onclick="loginMaster()" class="w-full bg-emerald-900 hover:bg-emerald-950 text-white font-bold py-3 rounded-xl transition-all shadow-sm flex items-center justify-center gap-2 text-sm">
+              Accedi al Pannello <i class="fa-solid fa-lock-open"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 1. SEZIONE STOCK (ANIMATORI) -->
+    <section id="sec-stock" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
+        <div>
+          <h2 class="text-xl font-black text-stone-800 flex items-center gap-2.5">
+            <i class="fa-solid fa-boxes-stacked text-emerald-700"></i> Gestione Magazzino
+          </h2>
+          <p class="text-xs text-stone-500 font-medium mt-0.5">Gestisci giacenze ed esporta/importa lo stock in Excel (CSV)</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <div class="relative flex-grow md:flex-grow-0">
+            <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-stone-400 text-xs"></i>
+            <input type="text" id="stockSearch" oninput="renderStockTables()" placeholder="Cerca articolo o codice..." class="pl-9 pr-3.5 py-2 border rounded-xl text-xs w-full md:w-60 outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+          </div>
+          <button onclick="exportStockExcel()" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 text-xs font-bold px-3.5 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Esporta Excel
+          </button>
+          <label class="bg-stone-200 hover:bg-stone-300 text-stone-800 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all flex items-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-file-arrow-up"></i> Importa Stock
+            <input type="file" accept=".csv,.json" onchange="importStockFile(event)" class="hidden">
+          </label>
+          <button onclick="openCategoryModal()" class="bg-stone-100 hover:bg-stone-200 text-stone-700 text-xs font-bold px-3.5 py-2 rounded-xl border transition-all flex items-center gap-2">
+            <i class="fa-solid fa-folder-plus text-stone-500"></i> Categoria
+          </button>
+          <button onclick="openArticleModal()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Nuovo Articolo
+          </button>
+        </div>
+      </div>
+
+      <div id="stockCategoryContainers" class="space-y-6"></div>
+    </section>
+
+    <!-- 2. SEZIONE EDITOR MODULI (ANIMATORI) -->
+    <section id="sec-editor" class="hidden space-y-6">
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-black text-stone-800 flex items-center gap-2.5">
+            <i class="fa-solid fa-pen-to-square text-emerald-700"></i> Editor Moduli & Etichette
+          </h2>
+          <p class="text-xs text-stone-500 font-medium mt-0.5">Seleziona gli articoli e gestisci etichette e colori</p>
+        </div>
+        
+        <button onclick="openNewBranchModal()" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 text-xs font-extrabold px-4 py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-plus-circle"></i> Aggiungi Nuova Branca
+        </button>
+      </div>
+
+      <div id="editorBranchTabs" class="flex flex-wrap gap-2 bg-white p-2 rounded-2xl border border-stone-200 shadow-sm"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 space-y-5">
+          <div class="flex justify-between items-center border-b pb-3">
+            <div>
+              <span class="text-[10px] font-extrabold uppercase tracking-wider text-stone-400">Branca Selezionata</span>
+              <h3 class="font-extrabold text-stone-800 text-lg flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-amber-500"></i> <span id="editorBranchTitle">Lupetti</span>
+              </h3>
+            </div>
+            <button onclick="deleteCurrentBranch()" class="text-xs text-rose-600 hover:text-rose-800 font-bold flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 px-3 py-1.5 rounded-xl border border-rose-200/60 transition-all">
+              <i class="fa-solid fa-trash-can"></i> Elimina
+            </button>
+          </div>
+
+          <div class="space-y-3">
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Plurale (es. Esploratori)</label>
+              <input type="text" id="editorBranchNamePlural" class="w-full p-2.5 border rounded-xl text-xs font-bold outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Singolare (es. Esploratore)</label>
+              <input type="text" id="editorBranchNameSingular" class="w-full p-2.5 border rounded-xl text-xs font-bold outline-none">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Messaggio Introduttivo Formulario</label>
+              <textarea id="editorIntroText" rows="3" class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium leading-relaxed"></textarea>
+            </div>
+          </div>
+
+          <div class="bg-stone-50 p-3.5 rounded-2xl border border-stone-200 space-y-2">
+            <label class="block font-bold text-stone-800 flex items-center gap-1.5 text-xs">
+              <i class="fa-solid fa-truck-fast text-stone-600"></i> Spese di Spedizione per questa Branca
+            </label>
+            <div class="flex items-center gap-2">
+              <input type="checkbox" id="editorBranchEnableShipping" class="accent-emerald-700 w-4 h-4 rounded">
+              <label for="editorBranchEnableShipping" class="font-semibold text-stone-700 text-xs">Abilita spesa fissa automatica</label>
+            </div>
+            <div>
+              <label class="block text-[10px] font-bold text-stone-400 uppercase">Costo Spedizione Standard (CHF)</label>
+              <input type="number" step="0.50" id="editorBranchShippingCost" placeholder="es. 7.00" class="w-full p-2 border rounded-lg font-bold text-stone-800 bg-white text-xs">
+            </div>
+          </div>
+
+          <div class="border-t pt-4 space-y-2">
+            <label class="block text-xs font-bold text-stone-700 uppercase tracking-wider">Gestione Etichette & Colori</label>
+            <div id="editorTagsList" class="flex flex-wrap gap-1.5 my-2"></div>
+            <div class="flex gap-2">
+              <input type="text" id="newTagInput" placeholder="Nome etichetta..." class="p-2 border rounded-xl text-xs flex-grow outline-none bg-stone-50">
+              <button type="button" onclick="addNewTag()" class="bg-stone-800 hover:bg-black text-white px-3 py-2 rounded-xl text-xs font-bold transition-all">+ Aggiungi</button>
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5">Documenti / PDF Scaricabili</label>
+            <div id="editorDocList" class="space-y-2 mb-2"></div>
+            <div class="p-3 border-2 border-dashed border-stone-200 rounded-xl text-center bg-stone-50 hover:bg-stone-100 transition-all">
+              <label class="cursor-pointer text-xs font-bold text-emerald-800 flex items-center justify-center gap-2">
+                <i class="fa-solid fa-file-arrow-up text-base text-emerald-700"></i> Carica PDF
+                <input type="file" accept="application/pdf,.doc,.docx" onchange="handleFileUpload(event)" class="hidden">
+              </label>
+            </div>
+          </div>
+
+          <button onclick="saveEditorBranchConfig()" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-bold py-2.5 rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-2">
+            <i class="fa-solid fa-floppy-disk"></i> Salva Impostazioni Branca
+          </button>
+        </div>
+
+        <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-stone-200 space-y-4">
+          <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="font-extrabold text-stone-800 flex items-center gap-2 text-sm">
+              <i class="fa-solid fa-list-check text-emerald-700"></i> Articoli di Magazzino per questa Branca
+            </h3>
+            <button onclick="openArticleModal()" class="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-900 font-bold px-3 py-1.5 rounded-xl border border-emerald-200">
+              + Crea Articolo in Stock
+            </button>
+          </div>
+
+          <div id="editorArticlesContainer" class="space-y-3 max-h-[580px] overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. SUB-TAB: COMANDA SEZIONALE / HAJK -->
+    <section id="sec-sezionale" class="hidden space-y-6">
+      <div class="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 p-6 rounded-3xl text-white shadow-md border border-emerald-800 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-[10px] font-black uppercase text-amber-400 tracking-widest">Bozza Corrente Sezione</span>
+            <span id="sezionaleBadgeQty" class="bg-amber-500 text-emerald-950 text-[10px] font-black px-2 py-0.5 rounded-full">0 articoli</span>
+          </div>
+          <h3 class="text-xl font-black mt-1">Comanda Sezionale (Hajk)</h3>
+          <p class="text-xs text-emerald-200/80 font-medium mt-0.5">Seleziona i prodotti dallo Stock col tasto verde 🛒 per aggiungerli qui.</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <button onclick="downloadQuickOrderCartExcel()" class="bg-amber-500 hover:bg-amber-400 text-emerald-950 font-black px-4 py-2.5 rounded-xl text-xs shadow-sm transition-all flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Scarica Excel Hajk
+          </button>
+          <button onclick="archiveSezionaleOrder()" class="bg-emerald-800 hover:bg-emerald-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs border border-emerald-600 transition-all flex items-center gap-2">
+            <i class="fa-solid fa-box-archive"></i> Archivia Comanda
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+          <h4 class="text-xs font-extrabold text-stone-700 uppercase tracking-wider">Comanda attiva:</h4>
+          <button onclick="clearQuickOrderCart()" class="text-xs text-rose-600 hover:text-rose-800 font-bold px-3 py-1.5 rounded-xl bg-rose-50 border border-rose-200">
+            <i class="fa-solid fa-trash-can"></i> Svuota Bozza
+          </button>
+        </div>
+        <div id="sezionaleActiveItemsContainer" class="space-y-2 max-h-[400px] overflow-y-auto pr-1"></div>
+      </div>
+
+      <div class="bg-white p-5 rounded-2xl shadow-sm border border-stone-200 space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-3 gap-2">
+          <h3 class="font-extrabold text-stone-800 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-box-archive text-stone-500"></i> Storico comande sezionali archiviate
+          </h3>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-stone-500 uppercase">Filtra Stato:</span>
+            <select id="filterSezionaleHistoryStatus" onchange="renderSezionaleOrdersTab()" class="text-xs font-bold px-3 py-1.5 rounded-xl border bg-stone-50 text-stone-800 outline-none">
+              <option value="all">Tutti gli stati</option>
+              <option value="Ordinato">Ordinato</option>
+              <option value="Ricevuto">Ricevuto</option>
+            </select>
+          </div>
+        </div>
+        <div id="sezionaleHistoryContainer" class="space-y-3"></div>
+      </div>
+    </section>
+
+    <!-- 4. SEZIONE COMANDE / REGISTRO FAMIGLIE (ANIMATORI) -->
+    <section id="sec-orders" class="hidden space-y-6">
+      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-5 rounded-2xl shadow-sm border border-stone-200">
+        <div>
+          <h2 class="text-xl font-black text-stone-800 flex items-center gap-2.5">
+            <i class="fa-solid fa-clipboard-list text-emerald-700"></i> Registro Comande Famiglie
+          </h2>
+          <p class="text-xs text-stone-500 font-medium mt-0.5">Gestisci le comande inviate dalle famiglie ed esporta i dati in Excel (CSV)</p>
+        </div>
+        <div class="flex flex-wrap gap-2 w-full md:w-auto">
+          <button onclick="exportOrdersCSV()" class="bg-emerald-800 hover:bg-emerald-900 text-white text-xs font-bold px-4 py-2 rounded-xl shadow-sm transition-all flex items-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Esporta Excel / CSV
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+        <div class="p-4 border-b bg-stone-50/50 flex flex-wrap gap-3 justify-between items-center">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-stone-500 uppercase tracking-wider">Filtra Branca:</span>
+            <select id="filterOrderBranch" onchange="renderOrdersTable()" class="text-xs font-semibold border rounded-xl p-2 outline-none bg-white">
+              <option value="all">Tutte le Branche</option>
+            </select>
+          </div>
+          <div class="text-xs text-stone-600 font-extrabold" id="ordersCounter">Totale: 0 comande</div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-stone-100/80 text-stone-500 font-extrabold border-b uppercase tracking-wider text-[10px]">
+                <th class="p-3.5">ID / Data</th>
+                <th class="p-3.5">Branca</th>
+                <th class="p-3.5">Partecipante</th>
+                <th class="p-3.5">Genitore / Contatto</th>
+                <th class="p-3.5">Articoli Ordinati</th>
+                <th class="p-3.5">Totale</th>
+                <th class="p-3.5">Stato</th>
+                <th class="p-3.5 text-right">Azioni</th>
+              </tr>
+            </thead>
+            <tbody id="ordersTableBody" class="divide-y divide-stone-100 font-medium"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. SEZIONE FORMULARIO FAMIGLIE -->
+    <section id="sec-family-form" class="hidden max-w-4xl mx-auto space-y-6">
+      <div id="familyBranchHeader" class="bg-gradient-to-br from-emerald-900 via-emerald-950 to-emerald-900 text-white p-6 sm:p-8 rounded-3xl shadow-lg border border-emerald-800 space-y-3 relative overflow-hidden">
+        <div class="absolute -right-6 -bottom-6 text-white/5 text-9xl pointer-events-none">
+          <i class="fa-solid fa-campground"></i>
+        </div>
+      </div>
+
+      <div id="familyDocsContainer" class="hidden bg-white p-5 rounded-2xl border border-stone-200 shadow-sm">
+        <h3 class="text-xs font-bold uppercase tracking-wider text-stone-500 mb-3 flex items-center gap-2">
+          <i class="fa-solid fa-file-pdf text-rose-600 text-sm"></i> Documenti Utili allegati per questa Branca
+        </h3>
+        <div id="familyDocsList" class="flex flex-wrap gap-2.5"></div>
+      </div>
+
+      <form id="orderForm" onsubmit="handleOrderSubmit(event)" class="space-y-6">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-200/80 space-y-4">
+          <h3 class="text-sm font-extrabold text-stone-800 border-b pb-3 flex items-center gap-2 uppercase tracking-wide">
+            <i class="fa-solid fa-id-card text-emerald-700"></i> Dati Anagrafici & Indirizzo
+          </h3>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5" id="lblChildName">Nome e Cognome Partecipante *</label>
+              <input type="text" id="inputChildName" required class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-stone-50/50">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5">Nome e Cognome Genitore *</label>
+              <input type="text" id="inputParentName" required class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-stone-50/50">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5">Email Genitore *</label>
+              <input type="email" id="inputParentEmail" required class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-stone-50/50">
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5">Telefono *</label>
+              <input type="tel" id="inputParentPhone" required class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-stone-50/50">
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-stone-600 uppercase mb-1.5">Indirizzo di Fatturazione (Via, CAP, Località) *</label>
+              <textarea id="inputBillingAddress" rows="2" required class="w-full p-3 border rounded-xl text-xs focus:ring-2 focus:ring-emerald-500 outline-none font-medium bg-stone-50/50" placeholder="Via ... , CAP Città ..."></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-stone-200/80 space-y-4">
+          <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="text-sm font-extrabold text-stone-800 flex items-center gap-2 uppercase tracking-wide">
+              <i class="fa-solid fa-shirt text-amber-500"></i> Selezione Materiale
+            </h3>
+            <span class="text-xs text-stone-400 font-semibold">Scegli quantità e misura</span>
+          </div>
+
+          <div id="familyCatalogList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+        <div class="bg-amber-50/60 p-6 rounded-3xl border border-amber-200/80 space-y-5">
+          <div class="bg-white p-3.5 rounded-2xl border border-amber-200 text-xs text-amber-900 font-semibold flex items-start gap-3 shadow-sm">
+            <i class="fa-solid fa-circle-exclamation text-amber-600 text-base mt-0.5"></i>
+            <div>
+              Si ricorda che <strong>l'ordinazione è vincolante</strong>. La fattura sarà consegnata assieme alla merce.
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-amber-200/80 pb-4">
+            <div>
+              <span class="text-xs uppercase font-extrabold text-amber-800 tracking-wider">Totale Indicativo Comanda</span>
+              <div class="text-3xl font-black text-amber-900" id="orderTotalDisplay">CHF 0.00</div>
+              <p class="text-[11px] text-amber-800 font-semibold mt-1 flex items-center gap-1.5" id="shippingNote">
+                <i class="fa-solid fa-truck-fast"></i> Le spese di spedizione non sono incluse nel totale indicativo e verranno calcolate alla consegna/fatturazione
+              </p>
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <div class="flex justify-between items-center">
+              <label class="block text-xs font-extrabold text-amber-950 uppercase tracking-wider">Firma Elettronica del Genitore *</label>
+              <button type="button" onclick="clearSignature()" class="text-[11px] bg-rose-100 hover:bg-rose-200 text-rose-800 px-3 py-1 rounded-lg font-bold transition-all"><i class="fa-solid fa-eraser"></i> Cancella firma</button>
+            </div>
+            
+            <div class="relative">
+              <canvas id="sigCanvas" class="sig-canvas w-full h-32 shadow-inner"></canvas>
+            </div>
+            <p class="text-[11px] text-stone-500 font-medium">Firma nel riquadro bianco con il dito o con il mouse</p>
+          </div>
+
+          <div class="pt-3 border-t border-amber-200/60 space-y-3">
+            <div class="bg-white/60 p-3 rounded-2xl border border-amber-200/60 text-[11px] text-stone-600 leading-relaxed font-medium">
+              <strong class="text-stone-800 flex items-center gap-1.5 mb-1"><i class="fa-solid fa-shield-halved text-emerald-800"></i> Informativa sulla Privacy e Protezione dei Dati:</strong>
+              I dati personali forniti in questo modulo saranno utilizzati esclusivamente per la gestione amministrativa, la preparazione dell'ordine del materiale scout e la relativa fatturazione.
+            </div>
+
+            <div class="flex items-start gap-2.5">
+              <input type="checkbox" id="chkPrivacy" required class="mt-0.5 w-4 h-4 accent-amber-600 rounded cursor-pointer">
+              <label for="chkPrivacy" class="text-xs text-stone-700 leading-tight font-medium cursor-pointer">
+                Ho letto l'informativa e acconsento al trattamento dei dati personali per le finalità connesse all'ordinazione. *
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" id="btnSubmitOrder" class="w-full bg-emerald-800 hover:bg-emerald-900 text-white font-extrabold py-4 rounded-2xl text-base shadow-lg transition-all flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane"></i> Invia Comanda Ufficiale
+        </button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- MODALI DI GESTIONE STOCK E IMPOSTAZIONI -->
+  <div id="modalArticle" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <h3 id="modalArticleTitle" class="text-lg font-extrabold text-stone-800 border-b pb-2">Nuovo Articolo Magazzino</h3>
+      <input type="hidden" id="editArticleIndex" value="-1">
+      <input type="hidden" id="editArticleCategory" value="">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Nome Articolo *</label>
+          <input type="text" id="artName" class="w-full p-2.5 border rounded-xl font-medium outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-stone-600 uppercase mb-1">Codice SKU</label>
+            <input type="text" id="artSku" class="w-full p-2.5 border rounded-xl font-mono uppercase">
+          </div>
+          <div>
+            <label class="block font-bold text-stone-600 uppercase mb-1">Prezzo (CHF) *</label>
+            <input type="number" step="0.05" id="artPrice" class="w-full p-2.5 border rounded-xl font-bold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Link Hajk (URL)</label>
+          <input type="url" id="artHajkLink" placeholder="https://www.hajk.ch/..." class="w-full p-2.5 border rounded-xl font-mono text-stone-600">
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Taglie & Giacenze</label>
+          <div id="artSizesContainer" class="space-y-2 mb-2"></div>
+          <button type="button" onclick="addSizeRow()" class="bg-stone-100 hover:bg-stone-200 text-stone-800 font-bold px-3 py-1.5 rounded-lg text-xs">+ Aggiungi Taglia</button>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button onclick="closeArticleModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Annulla</button>
+        <button onclick="saveArticleModal()" class="px-4 py-2 bg-emerald-800 text-white rounded-xl text-xs font-bold">Salva Articolo</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalCategory" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-extrabold text-stone-800 border-b pb-2">Aggiungi Categoria Magazzino</h3>
+      <div>
+        <label class="block text-xs font-bold text-stone-600 uppercase mb-1">Nome Categoria *</label>
+        <input type="text" id="inputNewCategoryName" placeholder="es. Uniformi..." class="w-full p-3 border rounded-xl text-xs font-bold outline-none">
+      </div>
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button onclick="closeCategoryModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Annulla</button>
+        <button onclick="saveCategoryModal()" class="px-4 py-2 bg-emerald-800 text-white rounded-xl text-xs font-bold">Crea Categoria</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalQuickOrder" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200 space-y-4">
+      <h3 class="text-lg font-extrabold text-stone-800 border-b pb-2 flex items-center gap-2">
+        <i class="fa-solid fa-cart-plus text-emerald-700"></i> Aggiungi a Comanda Sezionale
+      </h3>
+      <input type="hidden" id="quickArtId">
+      <input type="hidden" id="quickArtCat">
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <span class="text-[10px] font-extrabold text-stone-400 uppercase">Articolo Selezionato</span>
+          <div id="quickOrderArticleName" class="font-black text-stone-800 text-base">Foulard Scout</div>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Seleziona Misura *</label>
+          <select id="quickOrderSizeSelect" class="w-full p-3 border rounded-xl text-xs font-bold bg-stone-50 outline-none"></select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Quantità desiderata *</label>
+          <input type="number" id="quickOrderQtyInput" min="1" value="1" class="w-full p-3 border rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 bg-stone-50">
+        </div>
+
+        <div class="bg-stone-50 p-3 rounded-xl border text-[11px] text-stone-600 space-y-1">
+          <div><strong>Codice Hajk:</strong> <span id="quickOrderCodeDisplay">-</span></div>
+          <div><strong>Link:</strong> <span id="quickOrderLinkDisplay" class="text-emerald-700 truncate block">-</span></div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button onclick="closeQuickOrderModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Annulla</button>
+        <button onclick="confirmAddToCartSezionale()" class="px-4 py-2 bg-emerald-800 hover:bg-emerald-900 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-cart-plus"></i> Aggiungi alla Comanda
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODALE SETTINGS (INCLUSO REGISTRO MOVIMENTI STOCK NELLE IMPOSTAZIONI) -->
+  <div id="modalSettings" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-stone-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <h3 class="text-lg font-extrabold text-stone-800 border-b pb-2 flex items-center gap-2">
+        <i class="fa-solid fa-gear text-emerald-700"></i> Impostazioni, Cloud & Registro
+      </h3>
+
+      <div class="space-y-4 text-xs">
+        <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200 space-y-2">
+          <div class="flex justify-between items-center">
+            <label class="font-bold text-stone-800 flex items-center gap-1.5">
+              <i class="fa-solid fa-clock-rotate-left text-emerald-800"></i> Registro Movimenti Magazzino
+            </label>
+            <button onclick="openStockAuditModal()" class="bg-white hover:bg-stone-100 text-stone-800 px-3 py-1.5 rounded-xl border text-xs font-bold transition-all shadow-sm">
+              Visualizza Storico
+            </button>
+          </div>
+          <p class="text-[10px] text-stone-500">Controlla tutte le modifiche e i movimenti effettuati sullo stock.</p>
+        </div>
+
+        <div class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 space-y-2">
+          <label class="block font-bold text-amber-950 flex items-center gap-1.5">
+            <i class="fa-solid fa-cloud text-amber-600"></i> Cloud Sync (JSONBin.io)
+          </label>
+          <input type="text" id="cfgBinId" class="w-full p-2 border rounded-lg font-mono text-stone-800 bg-white text-xs" placeholder="Bin ID">
+          <input type="password" id="cfgApiKey" class="w-full p-2 border rounded-lg font-mono text-stone-800 bg-white text-xs mt-1" placeholder="API Key ($2a$...)">
+        </div>
+
+        <div>
+          <label class="block font-bold text-stone-600 uppercase mb-1">Password Animatori (Master)</label>
+          <input type="text" id="cfgMasterPass" class="w-full p-2 border rounded-xl font-mono">
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2 border-t">
+        <button onclick="closeSettingsModal()" class="px-4 py-2 border rounded-xl text-xs font-bold text-stone-600">Annulla</button>
+        <button onclick="saveSettingsModal()" class="px-4 py-2 bg-emerald-800 text-white rounded-xl text-xs font-bold">Salva Impostazioni</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalStockAudit" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-stone-200 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b pb-3">
+        <h3 class="text-base font-extrabold text-stone-800 flex items-center gap-2">
+          <i class="fa-solid fa-clock-rotate-left text-emerald-700"></i> Registro Movimenti Magazzino
+        </h3>
+        <button onclick="closeStockAuditModal()" class="text-stone-400 hover:text-stone-700 font-bold"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div id="stockAuditContainer" class="space-y-2 max-h-[400px] overflow-y-auto pr-1"></div>
+      <div class="flex justify-end pt-2 border-t">
+        <button onclick="closeStockAuditModal()" class="px-4 py-2 bg-stone-800 text-white rounded-xl text-xs font-bold">Chiudi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT APPLICAZIONE -->
+  <script>
+    let config = JSON.parse(localStorage.getItem('scout_config')) || {
+      masterPass: "admin123",
+      jsonBinId: "",
+      jsonApiKey: "",
+      branches: {
+        lupetti: { name: "Lupetti", singular: "Lupetto", intro: "Benvenuto nel portale comande per i Lupetti del Moesano.", enableShipping: true, shippingCost: 7.00, tags: ["Uniforme", "Libri", "Gadget"], color: "emerald", docs: [] },
+        esploratori: { name: "Esploratori", singular: "Esploratore", intro: "Benvenuto nel portale comande per gli Esploratori.", enableShipping: true, shippingCost: 7.00, tags: ["Uniforme", "Attrezzatura", "Gadget"], color: "amber", docs: [] }
+      }
+    };
+
+    let stock = JSON.parse(localStorage.getItem('scout_stock')) || {
+      "Uniformi": [
+        { name: "Foulard Sezionale", sku: "1355", price: 15.00, hajkLink: "https://www.hajk.ch", sizes: { "Unica": 50 } },
+        { name: "Camicia Scout Ufficiale", sku: "2010", price: 45.00, hajkLink: "https://www.hajk.ch", sizes: { "S": 10, "M": 15, "L": 8 } }
+      ]
+    };
+
+    let branchArticles = JSON.parse(localStorage.getItem('scout_branch_articles')) || {
+      lupetti: [{ name: "Foulard Sezionale", tag: "Uniforme", sku: "1355" }],
+      esploratori: [{ name: "Foulard Sezionale", tag: "Uniforme", sku: "1355" }]
+    };
+
+    let orders = JSON.parse(localStorage.getItem('scout_orders')) || [];
+    let quickOrderCart = JSON.parse(localStorage.getItem('scout_sezionale_cart')) || [];
+    let sezionaleHistory = JSON.parse(localStorage.getItem('scout_sezionale_history')) || [];
+    let stockAuditLog = JSON.parse(localStorage.getItem('scout_stock_audit')) || [];
+
+    let currentRole = null;
+    let currentFamilyBranch = null;
+    let currentAdminTab = 'stock';
+    let currentEditorBranch = 'lupetti';
+
+    window.onload = function() {
+      goHome();
+      initSignaturePad();
+    };
+
+    function saveState() {
+      localStorage.setItem('scout_config', JSON.stringify(config));
+      localStorage.setItem('scout_stock', JSON.stringify(stock));
+      localStorage.setItem('scout_branch_articles', JSON.stringify(branchArticles));
+      localStorage.setItem('scout_orders', JSON.stringify(orders));
+      localStorage.setItem('scout_sezionale_cart', JSON.stringify(quickOrderCart));
+      localStorage.setItem('scout_sezionale_history', JSON.stringify(sezionaleHistory));
+      localStorage.setItem('scout_stock_audit', JSON.stringify(stockAuditLog));
+    }
+
+    function logStockMovement(details) {
+      stockAuditLog.unshift({ date: new Date().toLocaleString('it-CH'), details });
+      saveState();
+    }
+
+    function goHome() {
+      currentRole = 'landing';
+      document.getElementById('sec-landing').classList.remove('hidden');
+      document.getElementById('sec-login').classList.add('hidden');
+      document.getElementById('sec-stock').classList.add('hidden');
+      document.getElementById('sec-editor').classList.add('hidden');
+      document.getElementById('sec-sezionale').classList.add('hidden');
+      document.getElementById('sec-orders').classList.add('hidden');
+      document.getElementById('sec-family-form').classList.add('hidden');
+      document.getElementById('adminNav').classList.add('hidden');
+      document.getElementById('familyBadge').classList.add('hidden');
+    }
+
+    function showLoginMode(mode) {
+      currentRole = mode;
+      document.getElementById('sec-landing').classList.add('hidden');
+      document.getElementById('sec-login').classList.remove('hidden');
+
+      if (mode === 'family') {
+        document.getElementById('loginHeaderIcon').className = "fa-solid fa-users text-2xl";
+        document.getElementById('loginHeaderTitle').innerText = "Ordinazione Famiglie";
+        document.getElementById('loginHeaderSubtitle').innerText = "Seleziona la tua branca per aprire il modulo";
+        document.getElementById('formLoginFamily').classList.remove('hidden');
+        document.getElementById('formLoginAdmin').classList.add('hidden');
+        renderBranchButtonsFamily();
+      } else {
+        document.getElementById('loginHeaderIcon').className = "fa-solid fa-user-gear text-2xl";
+        document.getElementById('loginHeaderTitle').innerText = "Area Capi & Animatori";
+        document.getElementById('loginHeaderSubtitle').innerText = "Inserisci la password di sblocco";
+        document.getElementById('formLoginFamily').classList.add('hidden');
+        document.getElementById('formLoginAdmin').classList.remove('hidden');
+        document.getElementById('inputPasscodeMaster').value = "";
+        document.getElementById('inputPasscodeMaster').focus();
+      }
+    }
+
+    function renderBranchButtonsFamily() {
+      const container = document.getElementById('familyBranchButtons');
+      container.innerHTML = "";
+      Object.entries(config.branches).forEach(([key, b]) => {
+        container.innerHTML += `
+          <button onclick="selectFamilyBranch('${key}')" class="w-full bg-stone-50 hover:bg-emerald-50 text-stone-800 hover:text-emerald-900 border border-stone-200 hover:border-emerald-300 font-bold p-4 rounded-2xl transition-all flex items-center justify-between text-left group shadow-sm">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-black">
+                <i class="fa-solid fa-campground"></i>
+              </div>
+              <div>
+                <div class="text-sm font-black">${b.name}</div>
+                <div class="text-[11px] text-stone-500 font-medium">Apri modulo ordinazione ${b.name}</div>
+              </div>
+            </div>
+            <i class="fa-solid fa-chevron-right text-stone-400 group-hover:translate-x-1 transition-transform"></i>
+          </button>
+        `;
+      });
+    }
+
+    function selectFamilyBranch(branchKey) {
+      currentFamilyBranch = branchKey;
+      const b = config.branches[branchKey];
+      document.getElementById('sec-login').classList.add('hidden');
+      document.getElementById('sec-family-form').classList.remove('hidden');
+      document.getElementById('familyBadge').classList.remove('hidden');
+      document.getElementById('familyBadgeText').innerText = `Famiglia • ${b.name}`;
+
+      document.getElementById('familyBranchHeader').innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-amber-500 text-emerald-950 rounded-2xl flex items-center justify-center text-xl font-bold shadow-md">
+            <i class="fa-solid fa-campground"></i>
+          </div>
+          <div>
+            <h2 class="text-2xl font-black">${b.name}</h2>
+            <p class="text-xs text-emerald-200 font-medium mt-0.5">${b.intro}</p>
+          </div>
+        </div>
+      `;
+
+      const docContainer = document.getElementById('familyDocsContainer');
+      const docList = document.getElementById('familyDocsList');
+      if (b.docs && b.docs.length > 0) {
+        docContainer.classList.remove('hidden');
+        docList.innerHTML = b.docs.map(d => `
+          <a href="${d.url}" download="${d.name}" class="bg-stone-50 hover:bg-stone-100 text-stone-800 text-xs font-bold px-3 py-2 rounded-xl border flex items-center gap-2 shadow-sm">
+            <i class="fa-solid fa-file-pdf text-rose-600"></i> ${d.name}
+          </a>
+        `).join('');
+      } else {
+        docContainer.classList.add('hidden');
+      }
+
+      document.getElementById('lblChildName').innerText = `Nome e Cognome ${b.singular} *`;
+      document.getElementById('shippingNote').innerHTML = `<i class="fa-solid fa-truck-fast"></i> Spese di spedizione fisse: <strong>CHF ${b.enableShipping ? b.shippingCost.toFixed(2) : '0.00'}</strong>`;
+      
+      renderFamilyCatalog();
+      updateOrderTotal();
+    }
+
+    function loginMaster() {
+      const pass = document.getElementById('inputPasscodeMaster').value;
+      if (pass === config.masterPass) {
+        document.getElementById('sec-login').classList.add('hidden');
+        document.getElementById('adminNav').classList.remove('hidden');
+        showTab('stock');
+      } else {
+        alert("Password non corretta!");
+      }
+    }
+
+    function logout() {
+      goHome();
+    }
+
+    function showTab(tabName) {
+      currentAdminTab = tabName;
+      ['stock', 'editor', 'sezionale', 'orders'].forEach(t => {
+        const el = document.getElementById(`sec-${t}`);
+        const btn = document.getElementById(`btn-${t}`);
+        if (el) el.classList.add('hidden');
+        if (btn) {
+          btn.className = "px-3.5 py-2 rounded-lg text-xs font-semibold transition-all flex items-center gap-2 text-emerald-200 hover:text-white hover:bg-emerald-800/60";
+        }
+      });
+
+      const activeSec = document.getElementById(`sec-${tabName}`);
+      const activeBtn = document.getElementById(`btn-${tabName}`);
+      if (activeSec) activeSec.classList.remove('hidden');
+      if (activeBtn) {
+        activeBtn.className = "px-3.5 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 bg-amber-500 text-emerald-950 shadow-sm";
+      }
+
+      if (tabName === 'stock') renderStockTables();
+      if (tabName === 'editor') renderEditorBranch(currentEditorBranch);
+      if (tabName === 'sezionale') renderSezionaleOrdersTab();
+      if (tabName === 'orders') renderOrdersTable();
+    }
+
+    function renderStockTables() {
+      const container = document.getElementById('stockCategoryContainers');
+      const search = document.getElementById('stockSearch') ? document.getElementById('stockSearch').value.toLowerCase() : '';
+      container.innerHTML = "";
+
+      Object.entries(stock).forEach(([catName, articles]) => {
+        let filteredArticles = articles;
+        if (search) {
+          filteredArticles = articles.filter(a => a.name.toLowerCase().includes(search) || a.sku.toLowerCase().includes(search));
+        }
+
+        let rowsHtml = "";
+        filteredArticles.forEach((art, artIdx) => {
+          let totalQty = Object.values(art.sizes).reduce((a, b) => a + b, 0);
+          let sizesSummary = Object.entries(art.sizes).map(([s, q]) => `<span class="bg-stone-100 border px-2 py-0.5 rounded text-[10px] font-bold">${s}: ${q}</span>`).join(' ');
+
+          rowsHtml += `
+            <tr class="hover:bg-stone-50 transition-colors">
+              <td class="p-3.5 font-extrabold text-stone-800">
+                ${art.name}
+                <div class="text-[10px] text-stone-400 font-mono">SKU: ${art.sku}</div>
+              </td>
+              <td class="p-3.5 font-mono text-emerald-900 font-bold">CHF ${art.price.toFixed(2)}</td>
+              <td class="p-3.5"><div class="flex flex-wrap gap-1">${sizesSummary}</div></td>
+              <td class="p-3.5 font-black text-stone-700">${totalQty} pz</td>
+              <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+                <button onclick="openQuickOrderModal('${catName}', ${artIdx})" class="w-8 h-8 rounded-full bg-emerald-800 hover:bg-emerald-900 text-white inline-flex items-center justify-center shadow-sm transition-all" title="Aggiungi alla comanda sezionale">
+                  <i class="fa-solid fa-cart-plus text-xs"></i>
+                </button>
+                <button onclick="openArticleModal('${catName}', ${artIdx})" class="text-stone-400 hover:text-emerald-800 p-1.5" title="Modifica"><i class="fa-solid fa-pen text-xs"></i></button>
+                <button onclick="deleteArticle('${catName}', ${artIdx})" class="text-stone-300 hover:text-rose-600 p-1.5" title="Elimina"><i class="fa-solid fa-trash-can text-xs"></i></button>
+              </td>
+            </tr>
+          `;
+        });
+
+        container.innerHTML += `
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+            <div class="p-4 bg-stone-50 border-b flex justify-between items-center">
+              <h3 class="font-black text-stone-800 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-folder text-amber-500"></i> ${catName}
+              </h3>
+              <button onclick="deleteCategory('${catName}')" class="text-xs text-rose-500 hover:text-rose-700 font-bold"><i class="fa-solid fa-trash-can"></i> Elimina Categoria</button>
+            </div>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-stone-100/60 text-stone-500 font-extrabold border-b uppercase tracking-wider text-[10px]">
+                    <th class="p-3.5">Articolo / SKU</th>
+                    <th class="p-3.5">Prezzo</th>
+                    <th class="p-3.5">Taglie & Giacenze</th>
+                    <th class="p-3.5">Totale</th>
+                    <th class="p-3.5 text-right">Azioni</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-stone-100">${rowsHtml || '<tr><td colspan="5" class="p-4 text-center text-stone-400 font-medium">Nessun articolo in questa categoria.</td></tr>'}</tbody>
+              </table>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function openQuickOrderModal(catName, artIdx) {
+      const art = stock[catName][artIdx];
+      document.getElementById('quickArtId').value = JSON.stringify({ catName, artIdx });
+      document.getElementById('quickOrderArticleName').innerText = art.name;
+      document.getElementById('quickOrderCodeDisplay').innerText = art.sku;
+      document.getElementById('quickOrderLinkDisplay').innerText = art.hajkLink || 'Nessun link';
+      document.getElementById('quickOrderQtyInput').value = 1;
+
+      const sizeSelect = document.getElementById('quickOrderSizeSelect');
+      sizeSelect.innerHTML = "";
+      Object.keys(art.sizes).forEach(s => {
+        sizeSelect.innerHTML += `<option value="${s}">${s} (Disponibili: ${art.sizes[s]})</option>`;
+      });
+
+      document.getElementById('modalQuickOrder').classList.remove('hidden');
+    }
+
+    function closeQuickOrderModal() {
+      document.getElementById('modalQuickOrder').classList.add('hidden');
+    }
+
+    function confirmAddToCartSezionale() {
+      const info = JSON.parse(document.getElementById('quickArtId').value);
+      const art = stock[info.catName][info.artIdx];
+      const size = document.getElementById('quickOrderSizeSelect').value;
+      const qty = parseInt(document.getElementById('quickOrderQtyInput').value) || 1;
+
+      const existing = quickOrderCart.find(i => i.sku === art.sku && i.size === size);
+      if (existing) {
+        existing.qty += qty;
+      } else {
+        quickOrderCart.push({
+          name: art.name,
+          sku: art.sku,
+          size: size,
+          qty: qty,
+          hajkLink: art.hajkLink
+        });
+      }
+
+      saveState();
+      closeQuickOrderModal();
+      renderSezionaleOrdersTab();
+      updateBadges();
+      alert("Articolo aggiunto alla Comanda Sezionale!");
+    }
+
+    function renderSezionaleOrdersTab() {
+      const activeContainer = document.getElementById('sezionaleActiveItemsContainer');
+      activeContainer.innerHTML = "";
+
+      document.getElementById('sezionaleBadgeQty').innerText = `${quickOrderCart.reduce((acc, i) => acc + i.qty, 0)} articoli`;
+
+      if (quickOrderCart.length === 0) {
+        activeContainer.innerHTML = `<div class="p-6 text-center text-xs text-stone-400 font-medium">Nessun articolo presente nella comanda sezionale attiva.</div>`;
+      } else {
+        quickOrderCart.forEach((item, idx) => {
+          activeContainer.innerHTML += `
+            <div class="flex items-center justify-between bg-stone-50 p-3 rounded-2xl border border-stone-200/80 text-xs gap-2">
+              <div class="flex-grow">
+                <div class="font-extrabold text-stone-800">${item.name}</div>
+                <div class="text-[10px] text-stone-500 font-semibold flex items-center gap-2 mt-0.5">
+                  <span>Misura: <strong class="text-stone-700">${item.size}</strong></span>
+                  <span>Codice SKU: <strong class="font-mono text-emerald-900 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">${item.sku}</strong></span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-1.5">
+                <button onclick="updateCartItemQty(${idx}, -1)" class="w-6 h-6 bg-white hover:bg-stone-200 rounded-lg border font-bold text-stone-700 flex items-center justify-center">-</button>
+                <span class="font-extrabold text-xs w-6 text-center">${item.qty}</span>
+                <button onclick="updateCartItemQty(${idx}, 1)" class="w-6 h-6 bg-white hover:bg-stone-200 rounded-lg border font-bold text-stone-700 flex items-center justify-center">+</button>
+              </div>
+
+              <button onclick="removeCartItem(${idx})" class="text-rose-400 hover:text-rose-600 p-1.5"><i class="fa-solid fa-trash-can"></i></button>
+            </div>
+          `;
+        });
+      }
+
+      const historyContainer = document.getElementById('sezionaleHistoryContainer');
+      historyContainer.innerHTML = "";
+
+      const historyStatusFilter = document.getElementById('filterSezionaleHistoryStatus') ? document.getElementById('filterSezionaleHistoryStatus').value : 'all';
+      let filteredHistory = sezionaleHistory;
+      if (historyStatusFilter !== 'all') {
+        filteredHistory = sezionaleHistory.filter(h => h.status === historyStatusFilter);
+      }
+
+      if (filteredHistory.length === 0) {
+        historyContainer.innerHTML = `<div class="text-xs text-stone-400 font-medium text-center py-4">Nessuna comanda sezionale archiviata.</div>`;
+      } else {
+        filteredHistory.forEach((h, hIdx) => {
+          let itemsHtml = "";
+          h.items.forEach(i => {
+            itemsHtml += `
+              <div class="flex items-center justify-between py-1.5 border-b border-stone-200/60 last:border-0 text-xs">
+                <div>
+                  <span class="font-black text-amber-600">${i.qty}x</span> <strong>${i.name}</strong> 
+                  <span class="font-mono text-[10px] bg-white px-1.5 py-0.5 rounded border text-stone-700 font-bold ml-1">Cod: ${i.sku}</span>
+                  <span class="text-stone-400 font-semibold ml-1">(Taglia: ${i.size})</span>
+                </div>
+              </div>
+            `;
+          });
+
+          historyContainer.innerHTML += `
+            <div class="bg-stone-50 border rounded-2xl p-4 text-xs space-y-3 shadow-sm">
+              <div class="flex flex-wrap justify-between items-center border-b pb-2.5 gap-2">
+                <div>
+                  <span class="font-black text-stone-800">Comanda Archiviata #${h.id}</span>
+                  <span class="text-[10px] text-stone-400 ml-2 font-medium">Data: ${h.date}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-bold text-stone-500 uppercase">Stato:</span>
+                  <select onchange="updateArchivedSezionaleStatus(${hIdx}, this.value)" class="text-xs font-black px-2.5 py-1.5 rounded-xl border bg-white text-emerald-900 outline-none shadow-sm">
+                    <option value="Ordinato" ${h.status === 'Ordinato' ? 'selected' : ''}>Ordinato</option>
+                    <option value="Ricevuto" ${h.status === 'Ricevuto' ? 'selected' : ''}>Ricevuto</option>
+                  </select>
+                </div>
+              </div>
+              <div class="space-y-1">${itemsHtml}</div>
+              <div class="flex justify-end gap-2 pt-2 border-t border-stone-200/60">
+                <button onclick="downloadArchivedSezionaleExcel(${hIdx})" class="bg-amber-500 hover:bg-amber-600 text-emerald-950 px-3.5 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm">
+                  <i class="fa-solid fa-file-excel"></i> Esporta Excel
+                </button>
+                <button onclick="deleteArchivedSezionale(${hIdx})" class="text-rose-500 hover:text-rose-700 px-2 py-1.5 rounded-xl text-xs font-bold border border-rose-200 bg-white"><i class="fa-solid fa-trash-can"></i></button>
+              </div>
+            </div>
+          `;
+        });
+      }
+    }
+
+    function updateCartItemQty(idx, delta) {
+      quickOrderCart[idx].qty += delta;
+      if (quickOrderCart[idx].qty <= 0) quickOrderCart.splice(idx, 1);
+      saveState();
+      renderSezionaleOrdersTab();
+      updateBadges();
+    }
+
+    function removeCartItem(idx) {
+      quickOrderCart.splice(idx, 1);
+      saveState();
+      renderSezionaleOrdersTab();
+      updateBadges();
+    }
+
+    function clearQuickOrderCart() {
+      if (confirm("Vuoi svuotare la bozza della comanda sezionale?")) {
+        quickOrderCart = [];
+        saveState();
+        renderSezionaleOrdersTab();
+        updateBadges();
+      }
+    }
+
+    function archiveSezionaleOrder() {
+      if (!quickOrderCart || quickOrderCart.length === 0) {
+        alert("Nessun articolo presente nella comanda sezionale da archiviare.");
+        return;
+      }
+
+      if (confirm("Vuoi archiviare la comanda sezionale corrente?")) {
+        sezionaleHistory.unshift({
+          id: sezionaleHistory.length + 1,
+          date: new Date().toISOString().split('T')[0],
+          status: 'Ordinato',
+          items: JSON.parse(JSON.stringify(quickOrderCart))
+        });
+        quickOrderCart = [];
+        saveState();
+        renderSezionaleOrdersTab();
+        updateBadges();
+        alert("Comanda sezionale archiviata con successo!");
+      }
+    }
+
+    function updateArchivedSezionaleStatus(index, val) {
+      if (sezionaleHistory[index]) {
+        sezionaleHistory[index].status = val;
+        saveState();
+      }
+    }
+
+    function deleteArchivedSezionale(index) {
+      if (confirm("Eliminare questa comanda dallo storico?")) {
+        sezionaleHistory.splice(index, 1);
+        saveState();
+        renderSezionaleOrdersTab();
+      }
+    }
+
+    function downloadQuickOrderCartExcel() {
+      if (quickOrderCart.length === 0) {
+        alert("Nessun articolo nella comanda sezionale.");
+        return;
+      }
+      let csv = "Codice SKU;Nome Articolo;Taglia;Quantita;Link Hajk\n";
+      quickOrderCart.forEach(i => {
+        csv += `"${i.sku}";"${i.name}";"${i.size}";${i.qty};"${i.hajkLink || ''}"\n`;
+      });
+      downloadCSVFile(csv, "comanda_sezionale_hajk.csv");
+    }
+
+    function downloadArchivedSezionaleExcel(hIdx) {
+      const h = sezionaleHistory[hIdx];
+      let csv = `Comanda Sezionale Archiviata #${h.id};Data: ${h.date};Stato: ${h.status}\n`;
+      csv += "Codice SKU;Nome Articolo;Taglia;Quantita\n";
+      h.items.forEach(i => {
+        csv += `"${i.sku}";"${i.name}";"${i.size}";${i.qty}\n`;
+      });
+      downloadCSVFile(csv, `comanda_archivio_${h.id}.csv`);
+    }
+
+    function downloadCSVFile(csvContent, fileName) {
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.setAttribute('href', url);
+      a.setAttribute('download', fileName);
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    function renderOrdersTable() {
+      const tbody = document.getElementById('ordersTableBody');
+      const branchFilterSelect = document.getElementById('filterOrderBranch');
+      
+      branchFilterSelect.innerHTML = `<option value="all">Tutte le Branche</option>` +
+        Object.entries(config.branches).map(([k, b]) => `<option value="${k}">${b.name}</option>`).join('');
+
+      const branchFilter = branchFilterSelect.value;
+      tbody.innerHTML = "";
+
+      let filtered = orders;
+      if (branchFilter !== 'all') filtered = orders.filter(o => o.branchKey === branchFilter);
+
+      document.getElementById('ordersCounter').innerText = `Totale: ${filtered.length} comande`;
+      updateBadges();
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="p-6 text-center text-xs text-stone-400 font-medium">Nessuna comanda ricevuta.</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(o => {
+        const itemsSummary = o.items.map(i => `• ${i.qty}x ${i.name} [${i.tag}] (Misura: ${i.size})`).join('<br>');
+
+        tbody.innerHTML += `
+          <tr class="hover:bg-stone-50 transition-colors">
+            <td class="p-3.5 font-bold">#${o.id}<div class="text-[10px] text-stone-400 font-normal">${o.date}</div></td>
+            <td class="p-3.5"><span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900">${o.branchName}</span></td>
+            <td class="p-3.5 font-extrabold text-stone-800">${o.childName}</td>
+            <td class="p-3.5 text-xs">
+              <div class="font-bold text-stone-700">${o.parentName}</div>
+              <div class="text-stone-400 text-[10px]">${o.parentPhone}</div>
+            </td>
+            <td class="p-3.5 text-xs">${itemsSummary}</td>
+            <td class="p-3.5 font-extrabold text-emerald-900">CHF ${o.total.toFixed(2)}</td>
+            <td class="p-3.5">
+              <select onchange="updateOrderStatus(${o.id}, this.value)" class="text-xs p-1 border rounded-xl font-bold bg-stone-50 text-emerald-900 outline-none">
+                <option value="Ricevuto" ${o.status === 'Ricevuto' ? 'selected' : ''}>Ricevuto</option>
+                <option value="In Lavorazione" ${o.status === 'In Lavorazione' ? 'selected' : ''}>In Lavorazione</option>
+                <option value="Pronto" ${o.status === 'Pronto' ? 'selected' : ''}>Pronto</option>
+                <option value="Consegnato" ${o.status === 'Consegnato' ? 'selected' : ''}>Consegnato</option>
+              </select>
+            </td>
+            <td class="p-3.5 text-right space-x-1 whitespace-nowrap">
+              <button onclick="deleteOrder(${o.id})" class="text-stone-300 hover:text-rose-600 p-1.5"><i class="fa-solid fa-trash-can text-xs"></i></button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    function updateOrderStatus(id, val) {
+      const ord = orders.find(o => o.id === id);
+      if (ord) {
+        ord.status = val;
+        saveState();
+        updateBadges();
+      }
+    }
+
+    function deleteOrder(id) {
+      if (confirm("Eliminare questa comanda?")) {
+        orders = orders.filter(o => o.id !== id);
+        saveState();
+        renderOrdersTable();
+        updateBadges();
+      }
+    }
+
+    function updateBadges() {
+      const sezBadge = document.getElementById('sezionaleBadge');
+      const ordersBadge = document.getElementById('ordersBadge');
+
+      const sezCount = quickOrderCart.reduce((acc, i) => acc + i.qty, 0);
+      if (sezBadge) {
+        if (sezCount > 0) {
+          sezBadge.innerText = sezCount;
+          sezBadge.classList.remove('hidden');
+        } else {
+          sezBadge.classList.add('hidden');
+        }
+      }
+
+      const newOrdersCount = orders.filter(o => o.status === 'Ricevuto').length;
+      if (ordersBadge) {
+        if (newOrdersCount > 0) {
+          ordersBadge.innerText = newOrdersCount;
+          ordersBadge.classList.remove('hidden');
+        } else {
+          ordersBadge.classList.add('hidden');
+        }
+      }
+    }
+
+    let sigCanvas, sigCtx, isDrawing = false;
+    function initSignaturePad() {
+      sigCanvas = document.getElementById('sigCanvas');
+      if (!sigCanvas) return;
+      sigCtx = sigCanvas.getContext('2d');
+      
+      const resizeCanvas = () => {
+        const rect = sigCanvas.getBoundingClientRect();
+        sigCanvas.width = rect.width;
+        sigCanvas.height = 130;
+      };
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+
+      const startDraw = (e) => {
+        isDrawing = true;
+        const rect = sigCanvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        sigCtx.beginPath();
+        sigCtx.moveTo(x, y);
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const rect = sigCanvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        sigCtx.lineTo(x, y);
+        sigCtx.strokeStyle = '#064e3b';
+        sigCtx.lineWidth = 2.5;
+        sigCtx.lineCap = 'round';
+        sigCtx.stroke();
+      };
+
+      const stopDraw = () => { isDrawing = false; };
+
+      sigCanvas.addEventListener('mousedown', startDraw);
+      sigCanvas.addEventListener('mousemove', draw);
+      sigCanvas.addEventListener('mouseup', stopDraw);
+      sigCanvas.addEventListener('touchstart', startDraw);
+      sigCanvas.addEventListener('touchmove', draw);
+      sigCanvas.addEventListener('touchend', stopDraw);
+    }
+
+    function clearSignature() {
+      if (sigCtx) sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height);
+    }
+
+    function renderFamilyCatalog() {
+      const container = document.getElementById('familyCatalogList');
+      container.innerHTML = "";
+
+      const allowedArticles = branchArticles[currentFamilyBranch] || [];
+      if (allowedArticles.length === 0) {
+        container.innerHTML = `<div class="col-span-2 p-6 text-center text-xs text-stone-400 font-medium">Nessun articolo configurato per questa branca.</div>`;
+        return;
+      }
+
+      allowedArticles.forEach((itemInfo, idx) => {
+        let foundArt = null;
+        for (let cat in stock) {
+          const match = stock[cat].find(a => a.sku === itemInfo.sku);
+          if (match) { foundArt = match; break; }
+        }
+
+        if (!foundArt) return;
+
+        let sizeOptions = "";
+        Object.entries(foundArt.sizes).forEach(([s, q]) => {
+          sizeOptions += `<option value="${s}">${s} (Disp: ${q})</option>`;
+        });
+
+        container.innerHTML += `
+          <div class="bg-stone-50 p-4 rounded-2xl border border-stone-200/80 space-y-3 shadow-sm">
+            <div>
+              <span class="bg-emerald-100 text-emerald-900 text-[10px] font-black px-2 py-0.5 rounded-full">${itemInfo.tag}</span>
+              <h4 class="font-extrabold text-stone-800 text-sm mt-1">${foundArt.name}</h4>
+              <div class="text-xs font-mono font-bold text-emerald-900 mt-0.5">CHF ${foundArt.price.toFixed(2)}</div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-stone-200/60">
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1">Misura</label>
+                <select name="family_size_${idx}" class="w-full p-2 border rounded-xl text-xs font-bold bg-white outline-none">
+                  ${sizeOptions}
+                </select>
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-stone-500 uppercase mb-1">Quantità</label>
+                <input type="number" name="family_qty_${idx}" min="0" value="0" onchange="updateOrderTotal()" class="w-full p-2 border rounded-xl text-xs font-bold bg-white outline-none">
+                <input type="hidden" name="family_sku_${idx}" value="${foundArt.sku}">
+                <input type="hidden" name="family_name_${idx}" value="${foundArt.name}">
+                <input type="hidden" name="family_price_${idx}" value="${foundArt.price}">
+                <input type="hidden" name="family_tag_${idx}" value="${itemInfo.tag}">
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function updateOrderTotal() {
+      const allowedArticles = branchArticles[currentFamilyBranch] || [];
+      const b = config.branches[currentFamilyBranch];
+      let subtotal = 0;
+
+      allowedArticles.forEach((_, idx) => {
+        const qtyInput = document.querySelector(`[name="family_qty_${idx}"]`);
+        const priceInput = document.querySelector(`[name="family_price_${idx}"]`);
+        if (qtyInput && priceInput) {
+          subtotal += (parseInt(qtyInput.value) || 0) * (parseFloat(priceInput.value) || 0);
+        }
+      });
+
+      const shipping = (b && b.enableShipping) ? b.shippingCost : 0;
+      document.getElementById('orderTotalDisplay').innerText = `CHF ${(subtotal + shipping).toFixed(2)}`;
+    }
+
+    function handleOrderSubmit(e) {
+      e.preventDefault();
+      const allowedArticles = branchArticles[currentFamilyBranch] || [];
+      const b = config.branches[currentFamilyBranch];
+
+      let items = [];
+      let subtotal = 0;
+
+      allowedArticles.forEach((_, idx) => {
+        const qty = parseInt(document.querySelector(`[name="family_qty_${idx}"]`).value) || 0;
+        if (qty > 0) {
+          items.push({
+            name: document.querySelector(`[name="family_name_${idx}"]`).value,
+            sku: document.querySelector(`[name="family_sku_${idx}"]`).value,
+            size: document.querySelector(`[name="family_size_${idx}"]`).value,
+            price: parseFloat(document.querySelector(`[name="family_price_${idx}"]`).value),
+            qty: qty,
+            tag: document.querySelector(`[name="family_tag_${idx}"]`).value
+          });
+          subtotal += qty * parseFloat(document.querySelector(`[name="family_price_${idx}"]`).value);
+        }
+      });
+
+      if (items.length === 0) {
+        alert("Seleziona almeno un articolo da ordinare.");
+        return;
+      }
+
+      orders.unshift({
+        id: Date.now().toString().slice(-5),
+        date: new Date().toISOString().split('T')[0],
+        branchKey: currentFamilyBranch,
+        branchName: b.name,
+        childName: document.getElementById('inputChildName').value,
+        parentName: document.getElementById('inputParentName').value,
+        parentEmail: document.getElementById('inputParentEmail').value,
+        parentPhone: document.getElementById('inputParentPhone').value,
+        billingAddress: document.getElementById('inputBillingAddress').value,
+        items,
+        total: subtotal + (b.enableShipping ? b.shippingCost : 0),
+        status: 'Ricevuto',
+        signature: sigCanvas.toDataURL()
+      });
+
+      saveState();
+      updateBadges();
+      alert("Comanda inviata con successo! Grazie.");
+      document.getElementById('orderForm').reset();
+      clearSignature();
+      goHome();
+    }
+
+    function renderEditorBranch(branchKey) {
+      currentEditorBranch = branchKey;
+      const b = config.branches[branchKey];
+
+      document.getElementById('editorBranchTabs').innerHTML = Object.entries(config.branches).map(([k, br]) => `
+        <button onclick="renderEditorBranch('${k}')" class="px-4 py-2 rounded-xl text-xs font-bold transition-all ${k === branchKey ? 'bg-emerald-800 text-white shadow-sm' : 'bg-stone-100 text-stone-700 hover:bg-stone-200'}">
+          ${br.name}
+        </button>
+      `).join('');
+
+      document.getElementById('editorBranchTitle').innerText = b.name;
+      document.getElementById('editorBranchNamePlural').value = b.name;
+      document.getElementById('editorBranchNameSingular').value = b.singular;
+      document.getElementById('editorIntroText').value = b.intro;
+      document.getElementById('editorBranchEnableShipping').checked = b.enableShipping;
+      document.getElementById('editorBranchShippingCost').value = b.shippingCost;
+
+      document.getElementById('editorTagsList').innerHTML = (b.tags || []).map((t, tIdx) => `
+        <span class="bg-emerald-50 border border-emerald-200 text-emerald-900 px-2.5 py-1 rounded-lg text-xs font-bold flex items-center gap-1.5">
+          ${t} <button type="button" onclick="removeTag('${branchKey}', ${tIdx})" class="text-rose-500 hover:text-rose-700 ml-1"><i class="fa-solid fa-xmark"></i></button>
+        </span>
+      `).join('');
+
+      document.getElementById('editorDocList').innerHTML = (b.docs || []).map((d, dIdx) => `
+        <div class="flex justify-between items-center bg-stone-50 p-2 rounded-xl border text-xs">
+          <span class="font-bold truncate"><i class="fa-solid fa-file-pdf text-rose-600 mr-1"></i> ${d.name}</span>
+          <button type="button" onclick="removeDoc('${branchKey}', ${dIdx})" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash-can"></i></button>
+        </div>
+      `).join('') || '<span class="text-[11px] text-stone-400">Nessun documento caricato.</span>';
+
+      const artContainer = document.getElementById('editorArticlesContainer');
+      artContainer.innerHTML = "";
+      let allStockArticles = [];
+      Object.entries(stock).forEach(([cat, arts]) => {
+        arts.forEach(a => allStockArticles.push({ ...a, category: cat }));
+      });
+
+      if (allStockArticles.length === 0) {
+        artContainer.innerHTML = `<div class="text-xs text-stone-400">Nessun articolo disponibile in magazzino.</div>`;
+        return;
+      }
+
+      const currentBranchArticles = branchArticles[branchKey] || [];
+      allStockArticles.forEach(art => {
+        const isAssociated = currentBranchArticles.find(a => a.sku === art.sku);
+        const assignedTag = isAssociated ? isAssociated.tag : (b.tags[0] || 'Generale');
+
+        artContainer.innerHTML += `
+          <div class="flex flex-wrap items-center justify-between bg-stone-50 p-3 rounded-2xl border border-stone-200 text-xs gap-2">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" ${isAssociated ? 'checked' : ''} onchange="toggleBranchArticle('${branchKey}', '${art.sku}', this.checked)" class="w-4 h-4 accent-emerald-800 rounded cursor-pointer">
+              <div>
+                <div class="font-black text-stone-800">${art.name}</div>
+                <div class="text-[10px] text-stone-400 font-mono">SKU: ${art.sku} • CHF ${art.price.toFixed(2)}</div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[10px] font-bold text-stone-500 uppercase">Etichetta:</span>
+              <select onchange="updateBranchArticleTag('${branchKey}', '${art.sku}', this.value)" class="p-1.5 border rounded-xl font-bold bg-white outline-none text-xs">
+                ${b.tags.map(t => `<option value="${t}" ${assignedTag === t ? 'selected' : ''}>${t}</option>`).join('')}
+              </select>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function saveEditorBranchConfig() {
+      const b = config.branches[currentEditorBranch];
+      b.name = document.getElementById('editorBranchNamePlural').value;
+      b.singular = document.getElementById('editorBranchNameSingular').value;
+      b.intro = document.getElementById('editorIntroText').value;
+      b.enableShipping = document.getElementById('editorBranchEnableShipping').checked;
+      b.shippingCost = parseFloat(document.getElementById('editorBranchShippingCost').value) || 0;
+      saveState();
+      alert("Configurazione branca salvata!");
+      renderEditorBranch(currentEditorBranch);
+    }
+
+    function addNewTag() {
+      const input = document.getElementById('newTagInput');
+      const val = input.value.trim();
+      if (val && !config.branches[currentEditorBranch].tags.includes(val)) {
+        config.branches[currentEditorBranch].tags.push(val);
+        saveState();
+        input.value = "";
+        renderEditorBranch(currentEditorBranch);
+      }
+    }
+
+    function removeTag(branchKey, tIdx) {
+      config.branches[branchKey].tags.splice(tIdx, 1);
+      saveState();
+      renderEditorBranch(branchKey);
+    }
+
+    function toggleBranchArticle(branchKey, sku, isChecked) {
+      if (!branchArticles[branchKey]) branchArticles[branchKey] = [];
+      if (isChecked) {
+        let artName = "";
+        for (let cat in stock) {
+          const found = stock[cat].find(a => a.sku === sku);
+          if (found) { artName = found.name; break; }
+        }
+        branchArticles[branchKey].push({ name: artName, sku: sku, tag: config.branches[branchKey].tags[0] || 'Generale' });
+      } else {
+        branchArticles[branchKey] = branchArticles[branchKey].filter(a => a.sku !== sku);
+      }
+      saveState();
+    }
+
+    function updateBranchArticleTag(branchKey, sku, newTag) {
+      const item = branchArticles[branchKey].find(a => a.sku === sku);
+      if (item) { item.tag = newTag; saveState(); }
+    }
+
+    function handleFileUpload(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          if (!config.branches[currentEditorBranch].docs) config.branches[currentEditorBranch].docs = [];
+          config.branches[currentEditorBranch].docs.push({ name: file.name, url: evt.target.result });
+          saveState();
+          renderEditorBranch(currentEditorBranch);
+          alert("Documento caricato!");
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeDoc(branchKey, dIdx) {
+      config.branches[branchKey].docs.splice(dIdx, 1);
+      saveState();
+      renderEditorBranch(branchKey);
+    }
+
+    function openNewBranchModal() {
+      const name = prompt("Nome della nuova Branca:");
+      if (name) {
+        const key = name.toLowerCase().replace(/\s+/g, '_');
+        config.branches[key] = { name, singular: name, intro: `Benvenuto.`, enableShipping: true, shippingCost: 7.00, tags: ["Uniforme"], color: "blue", docs: [] };
+        branchArticles[key] = [];
+        saveState();
+        renderEditorBranch(key);
+      }
+    }
+
+    function deleteCurrentBranch() {
+      if (Object.keys(config.branches).length <= 1) {
+        alert("Impossibile eliminare l'ultima branca.");
+        return;
+      }
+      if (confirm("Eliminare questa branca?")) {
+        delete config.branches[currentEditorBranch];
+        delete branchArticles[currentEditorBranch];
+        saveState();
+        renderEditorBranch(Object.keys(config.branches)[0]);
+      }
+    }
+
+    function openArticleModal(catName = null, artIdx = null) {
+      document.getElementById('modalArticle').classList.remove('hidden');
+      document.getElementById('artSizesContainer').innerHTML = "";
+      if (catName !== null && artIdx !== null) {
+        document.getElementById('modalArticleTitle').innerText = "Modifica Articolo";
+        document.getElementById('editArticleIndex').value = artIdx;
+        document.getElementById('editArticleCategory').value = catName;
+        const art = stock[catName][artIdx];
+        document.getElementById('artName').value = art.name;
+        document.getElementById('artSku').value = art.sku;
+        document.getElementById('artPrice').value = art.price;
+        document.getElementById('artHajkLink').value = art.hajkLink || "";
+        Object.entries(art.sizes).forEach(([s, q]) => addSizeRow(s, q));
+      } else {
+        document.getElementById('modalArticleTitle').innerText = "Nuovo Articolo Magazzino";
+        document.getElementById('editArticleIndex').value = "-1";
+        document.getElementById('editArticleCategory').value = Object.keys(stock)[0] || "Uniformi";
+        document.getElementById('artName').value = "";
+        document.getElementById('artSku').value = "";
+        document.getElementById('artPrice').value = "";
+        document.getElementById('artHajkLink').value = "";
+        addSizeRow("Unica", 10);
+      }
+    }
+
+    function closeArticleModal() {
+      document.getElementById('modalArticle').classList.add('hidden');
+    }
+
+    function addSizeRow(sizeName = "", qtyVal = 0) {
+      const container = document.getElementById('artSizesContainer');
+      const rowId = Date.now() + Math.random();
+      container.innerHTML += `
+        <div id="row_${rowId}" class="flex items-center gap-2">
+          <input type="text" placeholder="Taglia" value="${sizeName}" class="size-name p-2 border rounded-lg text-xs font-bold w-1/2">
+          <input type="number" placeholder="Qt" value="${qtyVal}" class="size-qty p-2 border rounded-lg text-xs font-bold w-1/3">
+          <button type="button" onclick="document.getElementById('row_${rowId}').remove()" class="text-rose-500 font-bold px-2">×</button>
+        </div>
+      `;
+    }
+
+    function saveArticleModal() {
+      const name = document.getElementById('artName').value.trim();
+      const sku = document.getElementById('artSku').value.trim().toUpperCase();
+      const price = parseFloat(document.getElementById('artPrice').value);
+      const hajkLink = document.getElementById('artHajkLink').value.trim();
+      const editCat = document.getElementById('editArticleCategory').value;
+      const editIdx = parseInt(document.getElementById('editArticleIndex').value);
+
+      if (!name || isNaN(price)) {
+        alert("Compila nome e prezzo.");
+        return;
+      }
+
+      let sizes = {};
+      document.querySelectorAll('#artSizesContainer > div').forEach(row => {
+        const sName = row.querySelector('.size-name').value.trim();
+        const sQty = parseInt(row.querySelector('.size-qty').value) || 0;
+        if (sName) sizes[sName] = sQty;
+      });
+
+      if (!stock[editCat]) stock[editCat] = [];
+      if (editIdx >= 0) {
+        stock[editCat][editIdx] = { name, sku, price, hajkLink, sizes };
+        logStockMovement(`Modificato articolo: ${name}`);
+      } else {
+        stock[editCat].push({ name, sku, price, hajkLink, sizes });
+        logStockMovement(`Creato articolo: ${name}`);
+      }
+
+      saveState();
+      closeArticleModal();
+      renderStockTables();
+    }
+
+    function deleteArticle(catName, artIdx) {
+      if (confirm("Eliminare l'articolo?")) {
+        logStockMovement(`Eliminato articolo: ${stock[catName][artIdx].name}`);
+        stock[catName].splice(artIdx, 1);
+        saveState();
+        renderStockTables();
+      }
+    }
+
+    function openCategoryModal() {
+      document.getElementById('modalCategory').classList.remove('hidden');
+    }
+    function closeCategoryModal() {
+      document.getElementById('modalCategory').classList.add('hidden');
+    }
+    function saveCategoryModal() {
+      const name = document.getElementById('inputNewCategoryName').value.trim();
+      if (name && !stock[name]) {
+        stock[name] = [];
+        logStockMovement(`Creata categoria: ${name}`);
+        saveState();
+        renderStockTables();
+        closeCategoryModal();
+      }
+    }
+    function deleteCategory(catName) {
+      if (confirm(`Eliminare la categoria "${catName}"?`)) {
+        delete stock[catName];
+        logStockMovement(`Eliminata categoria: ${catName}`);
+        saveState();
+        renderStockTables();
+      }
+    }
+
+    function exportStockExcel() {
+      let csv = "Categoria;Nome;SKU;Prezzo;Taglie;Link\n";
+      Object.entries(stock).forEach(([cat, arts]) => {
+        arts.forEach(a => {
+          csv += `"${cat}";"${a.name}";"${a.sku}";${a.price};"${JSON.stringify(a.sizes).replace(/"/g, '""')}";"${a.hajkLink || ''}"\n`;
+        });
+      });
+      downloadCSVFile(csv, "magazzino_stock.csv");
+    }
+
+    function importStockFile(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+          try {
+            stock = JSON.parse(evt.target.result);
+            logStockMovement("Importato stock");
+            saveState();
+            renderStockTables();
+            alert("Stock importato!");
+          } catch(err) { alert("File non valido."); }
+        };
+        reader.readAsText(file);
+      }
+    }
+
+    function exportOrdersCSV() {
+      let csv = "ID;Data;Branca;Partecipante;Genitore;Totale;Stato\n";
+      orders.forEach(o => {
+        csv += `"${o.id}";"${o.date}";"${o.branchName}";"${o.childName}";"${o.parentName}";${o.total};"${o.status}"\n`;
+      });
+      downloadCSVFile(csv, "comande_famiglie.csv");
+    }
+
+    function openSettingsModal() {
+      document.getElementById('cfgBinId').value = config.jsonBinId || "";
+      document.getElementById('cfgApiKey').value = config.jsonApiKey || "";
+      document.getElementById('cfgMasterPass').value = config.masterPass || "";
+      document.getElementById('modalSettings').classList.remove('hidden');
+    }
+    function closeSettingsModal() {
+      document.getElementById('modalSettings').classList.add('hidden');
+    }
+    function saveSettingsModal() {
+      config.jsonBinId = document.getElementById('cfgBinId').value.trim();
+      config.jsonApiKey = document.getElementById('cfgApiKey').value.trim();
+      config.masterPass = document.getElementById('cfgMasterPass').value.trim();
+      saveState();
+      closeSettingsModal();
+      alert("Impostazioni salvate!");
+    }
+
+    function openStockAuditModal() {
+      document.getElementById('modalStockAudit').classList.remove('hidden');
+      const container = document.getElementById('stockAuditContainer');
+      container.innerHTML = stockAuditLog.length === 0 ? '<div class="text-xs text-stone-400 text-center py-4">Nessun movimento.</div>' :
+        stockAuditLog.map(l => `<div class="bg-stone-50 p-3 rounded-xl border text-xs flex justify-between"><span>${l.details}</span><span class="font-mono text-[10px] text-stone-400">${l.date}</span></div>`).join('');
+    }
+    function closeStockAuditModal() {
+      document.getElementById('modalStockAudit').classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
